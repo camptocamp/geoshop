@@ -1,22 +1,10 @@
-networks:
-    qnetwork:
-
 services:
-    pgsql:
-        image: postgres:12-alpine
-        environment:
-            - POSTGRES_DB=extract
-            - POSTGRES_USER=extractuser
-            - POSTGRES_PASSWORD=demopassword
-        ports:
-            - "5432:5432"
 
     extract:
         build: ./extract
-        container_name: extract
         depends_on:
             pgsql:
-                condition: service_started
+                condition: service_healthy
         environment:
             - JAVA_OPTS=-Xms1G -Xmx2G -Duser.language=fr -Duser.region=CH -Dcom.sun.jndi.ldap.connect.pool.timeout=20000
         ports:
@@ -26,3 +14,38 @@ services:
             interval: 10s
             timeout: 10s
             retries: 15
+
+    # Postgres
+    pgsql:
+        image: postgres:12-alpine
+        environment:
+            - POSTGRES_DB=extract
+            - POSTGRES_USER=extractuser
+            - POSTGRES_PASSWORD=demopassword
+        ports:
+            - "5432:5432"
+        volumes:
+            - ./docker/ldap-ad/users.ldif:/docker-entrypoint-initdb.d
+            
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres"]
+            interval: 5s
+            timeout: 5s
+            retries: 5
+
+    updatedb:
+        image: postgres:12-alpine
+        depends_on:
+            extract:
+                condition: service_healthy
+        environment:
+            - PGHOST=pgsql
+            - PGDB=extract
+            - PGUSER=extractuser
+            - PGPASSWORD=demopassword
+        volumes:
+            - ./updatedb:/updatedb
+        entrypoint: 
+            psql --host=$PGHOST --username=$PGUSER --dbname=$PGDB \
+                < /updatedb/001_update_db.sql  \
+                < /updatedb/002_create_test_data.sql
