@@ -24,9 +24,6 @@ services:
             - POSTGRES_PASSWORD=demopassword
         ports:
             - "5432:5432"
-        volumes:
-            - ./docker/ldap-ad/users.ldif:/docker-entrypoint-initdb.d
-            
         healthcheck:
             test: ["CMD-SHELL", "pg_isready -U postgres"]
             interval: 5s
@@ -45,7 +42,7 @@ services:
             - PGPASSWORD=demopassword
         volumes:
             - ./updatedb:/updatedb
-        entrypoint: 
+        entrypoint:
             psql --host=$PGHOST --username=$PGUSER --dbname=$PGDB \
                 < /updatedb/001_update_db.sql  \
                 < /updatedb/002_create_test_data.sql
