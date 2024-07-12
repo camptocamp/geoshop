@@ -53,3 +53,24 @@ services:
         volumes:
             - ./mailhog:/home/mailhog/conf
         entrypoint: MailHog -auth-file=/home/mailhog/conf/auth-users
+
+    openldap:
+        image: osixia/openldap:1.5.0
+        environment:
+            - LDAP_ORGANISATION=Extract
+            - LDAP_DOMAIN=extract.org
+            - LDAP_ADMIN_PASSWORD=extract
+            - LDAP_CONFIG_PASSWORD=extract
+            - LDAP_RFC2307BIS_SCHEMA=true
+            - LDAP_REMOVE_CONFIG_AFTER_SETUP=true
+            - LDAP_TLS_VERIFY_CLIENT=try
+        ports:
+            - "389:389"
+            - "636:636"
+
+    ldap-ad:
+        build: ./ldap-ad
+        volumes:
+            - ./ldap-ad/users.ldif:/ldap/users.ldif
+        ports:
+            - "10389:10389"
