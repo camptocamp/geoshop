@@ -42,7 +42,14 @@ services:
             - PGPASSWORD=demopassword
         volumes:
             - ./updatedb:/updatedb
-        entrypoint:
-            psql --host=$PGHOST --username=$PGUSER --dbname=$PGDB \
-                < /updatedb/001_update_db.sql  \
-                < /updatedb/002_create_test_data.sql
+        entrypoint: /updatedb/update.sh
+
+    mailhog:
+        image: mailhog/mailhog
+        tty: true
+        ports:
+            - "1025:1025"
+            - "8025:8025"
+        volumes:
+            - ./mailhog:/home/mailhog/conf
+        entrypoint: MailHog -auth-file=/home/mailhog/conf/auth-users
