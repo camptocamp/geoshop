@@ -1,3 +1,6 @@
+networks:
+    qnetwork:
+
 services:
 
     extract:
@@ -74,3 +77,31 @@ services:
             - ./ldap-ad/users.ldif:/ldap/users.ldif
         ports:
             - "10389:10389"
+
+    # QGIS
+    qgisserver:
+        image: camptocamp/qgis-server
+        volumes:
+            - ./qgis/project:/etc/qgisserver
+        environment:
+            - QGIS_PROJECT_FILE=/etc/qgisserver/world.qgs
+            - QGIS_SERVER_LANDING_PAGE_PROJECTS_DIRECTORIES=/etc/qgisserver
+        networks:
+            - qnetwork
+
+    qgisproxy:
+        depends_on:
+            qgisserver:
+                condition: service_started
+        build:
+            context: ./qgis
+        image: reverseauth:0.5
+        hostname: qgisproxy
+        container_name: qgisproxy
+        volumes:
+            - ./qgis/nginx.conf:/etc/nginx/nginx/conf:ro
+        ports:
+            - 8888:80
+        networks:
+            - qnetwork
+            - default
