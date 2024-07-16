@@ -25,4 +25,5 @@ RUN  cd /extract-build/extract/extract/ && \
 # Extract service
 FROM tomcat:9.0.64-jre17
 LABEL Maintainer="andrey.rusakov@camptocamp.com" Vendor="Camptocamp"
+RUN mkdir -p /var/extract/orders
 COPY --from=builder /extract-build/extract/extract/target/extract##2.1-RELEASE.war /usr/local/tomcat/webapps/
