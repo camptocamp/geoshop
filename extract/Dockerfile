@@ -11,11 +11,18 @@ RUN apt-get update && \
     git clone https://github.com/asit-asso/extract && \
     git clone https://github.com/sitn/sitn_geoshop_connector
 
+COPY extract-task-exec /extract-build/extract-task-exec
+
 RUN cd /extract-build/sitn_geoshop_connector/plugin-interface && \
     mvn clean install && \
     cd /extract-build/sitn_geoshop_connector/connectors/extract-connector-geoshop/ && \
     mvn clean install && \
-    cp target/extract-connector-geoshop-2.0-BETA1.jar /extract-build/extract/extract/src/main/resources/connectors
+    cp target/extract-connector-geoshop-2.0-BETA1.jar /extract-build/extract/extract/src/main/resources/connectors && \
+    cd /extract-build/extract/extract-interface && \
+    mvn clean install && \
+    cd /extract-build/extract-task-exec && \
+    mvn clean install  && \
+    cp /extract-build/extract-task-exec/target/original-extract-task-exec-2.1-RELEASE.jar /extract-build/extract/extract/src/main/resources/task_processors/extract-task-exec-2.1-RELEASE.jar
 
 RUN  cd /extract-build/extract/extract/ && \
      bash install_dependencies.sh && \
