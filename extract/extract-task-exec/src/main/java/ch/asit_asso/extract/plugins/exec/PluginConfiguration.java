@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 arx iT
+ * Copyright (C) 2024
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Access to the settings for the archiving plugin.
  *
- * @author Florent Krin
  */
 public class PluginConfiguration {
 
