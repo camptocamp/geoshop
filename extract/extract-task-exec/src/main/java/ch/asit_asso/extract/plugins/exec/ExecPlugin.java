@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 arx iT
+ * Copyright (C) 2024 
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,59 +22,48 @@ import ch.asit_asso.extract.plugins.common.ITaskProcessorRequest;
 import ch.asit_asso.extract.plugins.common.ITaskProcessorResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A plugin that will copy data about a data item request for archiving.
+ * A plugin that runs an executable and collects the output
  *
- * @author Florent Krin
+ * @author Andrey Rusakov
  */
 public class ExecPlugin implements ITaskProcessor {
 
+    private static final String DEFAULT_LANGUAGE = "en";
     private static final String CONFIG_FILE_PATH = "plugins/exec/properties/configExec.properties";
     private static final String HELP_FILE_NAME = "executorHelp.html";
     private final Logger logger = LoggerFactory.getLogger(ExecPlugin.class);
     private final String code = "EXECUTE";
-
-    /**
-     * The class of the pictogram to use to represent this plugin.
-     */
     private final String pictoClass = "fa-folder-open-o";
 
-    private LocalizedMessages messages;
-    private Map<String, String> inputs;
-    private PluginConfiguration config;
+    private final LocalizedMessages messages;
+    private final Map<String, String> inputs;
+    private final PluginConfiguration config;
 
     public ExecPlugin() {
-        this.config = new PluginConfiguration(ExecPlugin.CONFIG_FILE_PATH);
-        this.messages = new LocalizedMessages();
+        this(DEFAULT_LANGUAGE, Map.of());
     }
 
     public ExecPlugin(final String language) {
-        this.config = new PluginConfiguration(ExecPlugin.CONFIG_FILE_PATH);
-        this.messages = new LocalizedMessages(language);
+        this(language, Map.of());
     }
 
     public ExecPlugin(final Map<String, String> settings) {
-        this();
-        this.inputs = settings;
+        this(DEFAULT_LANGUAGE, settings);
     }
 
     public ExecPlugin(final String language, final Map<String, String> settings) {
-        this(language);
-        this.inputs = settings;
+        this.inputs = new HashMap<>(settings);
+        this.config = new PluginConfiguration(ExecPlugin.CONFIG_FILE_PATH);
+        this.messages = new LocalizedMessages(language);
     }
 
     @Override
@@ -114,8 +103,8 @@ public class ExecPlugin implements ITaskProcessor {
 
     @Override
     public final String getParams() {
-        ObjectMapper mapper = new ObjectMapper();
-        ArrayNode parametersNode = mapper.createArrayNode();
+        var mapper = new ObjectMapper();
+        var parametersNode = mapper.createArrayNode();
 
         parametersNode.addObject()
                 .put("code", this.config.getProperty("paramPath"))
@@ -140,11 +129,24 @@ public class ExecPlugin implements ITaskProcessor {
     @Override
     public final ITaskProcessorResult execute(final ITaskProcessorRequest request, final IEmailSettings emailSettings) {
         this.logger.info("Starting executor plugin: %s / %s", request, emailSettings);
-        final ExecResult pluginResult = new ExecResult();
+        var pluginResult = new ExecResult();
+        var folderOut = Path.of(request.getFolderOut());
         pluginResult.setStatus(ITaskProcessorResult.Status.SUCCESS);
         pluginResult.setErrorCode("OK");
-        pluginResult.setMessage(request.toString());
+        pluginResult.setMessage(folderOut.resolve("output.txt").toString());
         pluginResult.setRequestData(request);
+        try {
+            if (!Files.exists(folderOut)) {
+                Files.createDirectories(folderOut);
+            }
+            Files.write(folderOut.resolve("output.txt"),
+                    String.format("Exec: %s\nResult: %s",
+                            config.getProperty("paramPath"),
+                            config.getProperty("paramTarget")).getBytes());
+        } catch (IOException ex) {
+            pluginResult.setStatus(ITaskProcessorResult.Status.ERROR);
+            pluginResult.setMessage(ex.toString());
+        }
         return pluginResult;
     }
 }

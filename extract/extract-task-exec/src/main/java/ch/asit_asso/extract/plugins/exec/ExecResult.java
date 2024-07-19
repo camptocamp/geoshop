@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 arx iT
+ * Copyright (C) 2024
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,6 @@ import ch.asit_asso.extract.plugins.common.ITaskProcessorResult;
 
 /**
  * The outcome of an archiving task.
- *
- * @author Florent Krin
  */
 public class ExecResult implements ITaskProcessorResult {
 

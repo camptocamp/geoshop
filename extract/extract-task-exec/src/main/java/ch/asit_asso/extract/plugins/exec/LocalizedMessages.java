@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 arx iT
+ * Copyright (C) 2024
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,28 +27,27 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-
 /**
  * An access to the plugin strings localized in a given language.
  *
- * @author Yves Grasset
  */
 public class LocalizedMessages {
 
     /**
-     * The language code to use if none has been provided or if the one provided is not available.
+     * The language code to use if none has been provided or if the one provided
+     * is not available.
      */
     private static final String DEFAULT_LANGUAGE = "en";
 
     /**
-     * The regular expression that checks if a language code is correctly formatted.
+     * The regular expression that checks if a language code is correctly
+     * formatted.
      */
     private static final String LOCALE_VALIDATION_PATTERN = "^[a-z]{2}(?:-[A-Z]{2})?$";
 
     /**
-     * A string with placeholders to build the relative path to the files that holds the strings localized
-     * in the defined language.
+     * A string with placeholders to build the relative path to the files that
+     * holds the strings localized in the defined language.
      */
     private static final String LOCALIZED_FILE_PATH_FORMAT = "plugins/exec/lang/%s/%s";
 
@@ -72,36 +71,33 @@ public class LocalizedMessages {
      */
     private Properties propertyFile;
 
-
-
     /**
-     * Creates a new localized messages access instance using the default language.
+     * Creates a new localized messages access instance using the default
+     * language.
      */
     public LocalizedMessages() {
         this.loadFile(LocalizedMessages.DEFAULT_LANGUAGE);
         this.language = LocalizedMessages.DEFAULT_LANGUAGE;
     }
 
-
-
     /**
      * Creates a new localized messages access instance.
      *
-     * @param languageCode the string that identifies the language to use for the messages to the user
+     * @param languageCode the string that identifies the language to use for
+     * the messages to the user
      */
     public LocalizedMessages(final String languageCode) {
         this.loadFile(languageCode);
         this.language = languageCode;
     }
 
-
-
     /**
-     * Reads the content of a file in the current language. Fallbacks will be used if the file is not available
-     * in the current language.
+     * Reads the content of a file in the current language. Fallbacks will be
+     * used if the file is not available in the current language.
      *
      * @param filename the name of the file to read
-     * @return the content of the file, or <code>null</code> if the file could not be read in any compatible language
+     * @return the content of the file, or <code>null</code> if the file could
+     * not be read in any compatible language
      */
     public final String getFileContent(final String filename) {
 
@@ -127,8 +123,6 @@ public class LocalizedMessages {
         return null;
     }
 
-
-
     /**
      * Obtains a localized string in the current language.
      *
@@ -144,13 +138,13 @@ public class LocalizedMessages {
         return this.propertyFile.getProperty(key);
     }
 
-
-
     /**
-     * Reads the file that holds the application strings in a given language. Fallbacks will be used if the
-     * application string file is not available in the given language.
+     * Reads the file that holds the application strings in a given language.
+     * Fallbacks will be used if the application string file is not available in
+     * the given language.
      *
-     * @param guiLanguage the string that identifies the language to use for the messages to the user
+     * @param guiLanguage the string that identifies the language to use for the
+     * messages to the user
      */
     private void loadFile(final String guiLanguage) {
         this.logger.debug("Loading the localization file for language {}.", guiLanguage);
@@ -186,17 +180,17 @@ public class LocalizedMessages {
         this.logger.info("Localized messages loaded.");
     }
 
-
-
     /**
-     * Builds a collection of possible paths a localized file to ensure that ne is found even if the
-     * specific language is not available. As an example, if the language is <code>fr-CH</code>, then the paths
-     * will be built for <code>fr-CH</code>, <code>fr</code> and the default language (say, <code>en</code>,
-     * for instance).
+     * Builds a collection of possible paths a localized file to ensure that ne
+     * is found even if the specific language is not available. As an example,
+     * if the language is <code>fr-CH</code>, then the paths will be built for
+     * <code>fr-CH</code>, <code>fr</code> and the default language (say,
+     * <code>en</code>, for instance).
      *
-     * @param locale   the string that identifies the desired language
+     * @param locale the string that identifies the desired language
      * @param filename the name of the localized file
-     * @return a collection of path strings to try successively to find the desired file
+     * @return a collection of path strings to try successively to find the
+     * desired file
      */
     private Collection<String> getFallbackPaths(final String locale, final String filename) {
         assert locale != null && locale.matches(LocalizedMessages.LOCALE_VALIDATION_PATTERN) :
