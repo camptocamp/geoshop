@@ -139,10 +139,18 @@ public class ExecPlugin implements ITaskProcessor {
             if (!Files.exists(folderOut)) {
                 Files.createDirectories(folderOut);
             }
-            Files.write(folderOut.resolve("output.txt"),
-                    String.format("Exec: %s\nResult: %s",
+            var mapper = new ObjectMapper();
+            var msg = String.format("paramPath: %s\nparamTarget: %s\nRequest:\n%s",
                             config.getProperty("paramPath"),
-                            config.getProperty("paramTarget")).getBytes());
+                            config.getProperty("paramTarget"),
+                            mapper.writeValueAsString(request));
+            Files.write(folderOut.resolve("output.txt"),
+                    String.format("paramPath: %s\nparamTarget: %s\nRequest:\n%s",
+                            config.getProperty("paramPath"),
+                            config.getProperty("paramTarget"),
+                            mapper.writeValueAsString(request)
+                    ).getBytes());
+            pluginResult.setMessage(folderOut.resolve("output.txt").toString() + "\n" + msg);
         } catch (IOException ex) {
             pluginResult.setStatus(ITaskProcessorResult.Status.ERROR);
             pluginResult.setMessage(ex.toString());
