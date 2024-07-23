@@ -9,8 +9,8 @@ services:
             pgsql:
                 condition: service_healthy
         environment: 
-            - JAVA_OPTS=-Xms1G -Xmx2G 
-              -Dspring.datasource.url="jdbc:postgresql://pgsql:5432/extract" 
+            - JAVA_OPTS=-Xms1G -Xmx2G
+              -Dspring.datasource.url="jdbc:postgresql://pgsql:5432/extract"
               -Dspring.datasource.username=extractuser 
               -Dspring.datasource.password=demopassword 
               -Duser.language=en -Duser.region=CH -Dcom.sun.jndi.ldap.connect.pool.timeout=20000
@@ -38,7 +38,7 @@ services:
             test: curl --fail http://localhost:8000 || exit 1
             interval: 10s
             timeout: 10s
-            retries: 15       
+            retries: 15
 
     # Postgis
     postgis:
@@ -67,7 +67,7 @@ services:
         ports:
             - "5432:5432"
         healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U extractuser" -d postgres]
+            test: ["CMD-SHELL", "pg_isready -U extractuser -d postgres"]
             interval: 5s
             timeout: 5s
             retries: 5
