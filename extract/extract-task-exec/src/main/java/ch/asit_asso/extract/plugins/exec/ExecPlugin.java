@@ -107,14 +107,8 @@ public class ExecPlugin implements ITaskProcessor {
         var parametersNode = mapper.createArrayNode();
 
         parametersNode.addObject()
-                .put("code", this.config.getProperty("paramPath"))
-                .put("label", this.messages.getString("paramPath.label"))
-                .put("type", "text")
-                .put("req", true)
-                .put("maxlength", 255);
-        parametersNode.addObject()
-                .put("code", this.config.getProperty("paramTarget"))
-                .put("label", this.messages.getString("paramTarget.label"))
+                .put("code", this.config.getProperty("pathToScript"))
+                .put("label", this.messages.getString("pathToScript.label"))
                 .put("type", "text")
                 .put("req", true)
                 .put("maxlength", 255);
@@ -131,27 +125,32 @@ public class ExecPlugin implements ITaskProcessor {
         this.logger.info("Starting executor plugin: %s / %s", request, emailSettings);
         var pluginResult = new ExecResult();
         var folderOut = Path.of(request.getFolderOut());
+        var folderIn = Path.of(request.getFolderIn());
+        var pathToScript = inputs.get(config.getProperty("pathToScript"));
+        
         pluginResult.setStatus(ITaskProcessorResult.Status.SUCCESS);
         pluginResult.setErrorCode("OK");
-        pluginResult.setMessage(folderOut.resolve("output.txt").toString());
+        pluginResult.setMessage(
+            String.format("Script: %s\nIn: %s\nOut: %s", pathToScript, folderIn, folderOut).toString());
         pluginResult.setRequestData(request);
         try {
             if (!Files.exists(folderOut)) {
                 Files.createDirectories(folderOut);
             }
-            var mapper = new ObjectMapper();
-            var msg = String.format("paramPath: %s\nparamTarget: %s\nRequest:\n%s",
-                            config.getProperty("paramPath"),
-                            config.getProperty("paramTarget"),
-                            mapper.writeValueAsString(request));
-            Files.write(folderOut.resolve("output.txt"),
-                    String.format("paramPath: %s\nparamTarget: %s\nRequest:\n%s",
-                            config.getProperty("paramPath"),
-                            config.getProperty("paramTarget"),
-                            mapper.writeValueAsString(request)
-                    ).getBytes());
-            pluginResult.setMessage(folderOut.resolve("output.txt").toString() + "\n" + msg);
-        } catch (IOException ex) {
+            if (!Files.exists(folderIn)) {
+                Files.createDirectories(folderIn);
+            }
+            Files.write(folderIn.resolve("request.json"),
+                    new ObjectMapper().writeValueAsBytes(request));
+            
+            Process proc = new ProcessBuilder()
+                    .inheritIO()
+                    .command("python3", pathToScript, 
+                            request.getFolderIn(), 
+                            request.getFolderOut())
+                    .start();
+            proc.waitFor();
+        } catch (IOException|InterruptedException ex) {
             pluginResult.setStatus(ITaskProcessorResult.Status.ERROR);
             pluginResult.setMessage(ex.toString());
         }
