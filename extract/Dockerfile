@@ -11,11 +11,18 @@ RUN apt-get update && \
     git clone https://github.com/asit-asso/extract && \
     git clone https://github.com/sitn/sitn_geoshop_connector
 
+COPY extract-task-exec /extract-build/extract-task-exec
+
 RUN cd /extract-build/sitn_geoshop_connector/plugin-interface && \
     mvn clean install && \
     cd /extract-build/sitn_geoshop_connector/connectors/extract-connector-geoshop/ && \
     mvn clean install && \
-    cp target/extract-connector-geoshop-2.0-BETA1.jar /extract-build/extract/extract/src/main/resources/connectors
+    cp target/extract-connector-geoshop-2.0-BETA1.jar /extract-build/extract/extract/src/main/resources/connectors && \
+    cd /extract-build/extract/extract-interface && \
+    mvn clean install && \
+    cd /extract-build/extract-task-exec && \
+    mvn clean install  && \
+    cp /extract-build/extract-task-exec/target/original-extract-task-exec-2.1-RELEASE.jar /extract-build/extract/extract/src/main/resources/task_processors/extract-task-exec-2.1-RELEASE.jar
 
 RUN  cd /extract-build/extract/extract/ && \
      bash install_dependencies.sh && \
@@ -25,5 +32,6 @@ RUN  cd /extract-build/extract/extract/ && \
 # Extract service
 FROM tomcat:9.0.64-jre17
 LABEL Maintainer="andrey.rusakov@camptocamp.com" Vendor="Camptocamp"
-RUN mkdir -p /var/extract/orders
+RUN apt update && apt upgrade -y && apt install -y python3 && mkdir -p /var/extract/orders && mkdir -p /extract/
 COPY --from=builder /extract-build/extract/extract/target/extract##2.1-RELEASE.war /usr/local/tomcat/webapps/
+COPY script.py /extract/script.py
