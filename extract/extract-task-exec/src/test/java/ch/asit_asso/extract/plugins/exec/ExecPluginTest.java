@@ -16,11 +16,22 @@
  */
 package ch.asit_asso.extract.plugins.exec;
 
+import ch.asit_asso.extract.plugins.common.ITaskProcessorResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
+import java.nio.file.Path;
+import java.util.Map;
+import org.mockito.Mockito;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
 
 /**
  *
@@ -28,14 +39,51 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
  */
 @Tag("fast")
 public class ExecPluginTest {
-   
+
+    private static final String TEST_SCRIPT_NAME = "script";
+
+    ExternalExecutor executor;
+    ExecPlugin plugin;
+    ExecRequest request;
+
     @BeforeEach
     public void setUp() {
-    
+        executor = mock(ExternalExecutor.class);
+        plugin = new ExecPlugin("en", Map.of("path", TEST_SCRIPT_NAME), executor);
+        request = new ExecRequest();
+        request.setFolderIn("input_folder");
+        request.setFolderOut("output_folder");
     }
-    
+
     @Test
     public void testDocsLoaded() {
         assertNotEquals("", new ExecPlugin().getHelp());
+    }
+
+    @Test
+    public void testExecute_success() {
+        var result = plugin.execute(request, null);
+
+        verify(executor, times(1)).execute(
+                Path.of(TEST_SCRIPT_NAME),
+                Path.of(request.getFolderIn()),
+                Path.of(request.getFolderOut()));
+
+        assertEquals(result.getStatus(), ITaskProcessorResult.Status.SUCCESS);
+    }
+
+    @Test
+    public void testExecute_failure() {
+        doThrow(new ExecException("Some error", new Exception()))
+                .when(executor).execute(any(), any(), any());
+
+        var result = plugin.execute(request, null);
+
+        verify(executor, times(1)).execute(
+                Path.of(TEST_SCRIPT_NAME),
+                Path.of(request.getFolderIn()),
+                Path.of(request.getFolderOut()));
+
+        assertEquals(result.getStatus(), ITaskProcessorResult.Status.ERROR);
     }
 }

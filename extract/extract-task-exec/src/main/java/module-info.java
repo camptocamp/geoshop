@@ -6,7 +6,7 @@ module ch.asit_asso.extract.plugins.exec {
             with ExecPlugin;
 
     requires ch.asit_asso.extract.commonInterface;
-
+    requires org.mockito;
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.databind;
     requires org.apache.commons.lang3;

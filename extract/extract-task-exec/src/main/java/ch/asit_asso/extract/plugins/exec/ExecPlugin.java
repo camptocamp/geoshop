@@ -44,26 +44,28 @@ public class ExecPlugin implements ITaskProcessor {
     private final String code = "EXECUTE";
     private final String pictoClass = "fa-folder-open-o";
 
+    private final ExternalExecutor executor;
     private final LocalizedMessages messages;
     private final Map<String, String> inputs;
     private final PluginConfiguration config;
 
     public ExecPlugin() {
-        this(DEFAULT_LANGUAGE, Map.of());
+        this(DEFAULT_LANGUAGE, Map.of(), new PythonScriptExecutor());
     }
 
     public ExecPlugin(final String language) {
-        this(language, Map.of());
+        this(language, Map.of(), new PythonScriptExecutor());
     }
 
     public ExecPlugin(final Map<String, String> settings) {
-        this(DEFAULT_LANGUAGE, settings);
+        this(DEFAULT_LANGUAGE, settings, new PythonScriptExecutor());
     }
 
-    public ExecPlugin(final String language, final Map<String, String> settings) {
+    public ExecPlugin(final String language, final Map<String, String> settings, ExternalExecutor executor) {
         this.inputs = new HashMap<>(settings);
         this.config = new PluginConfiguration(ExecPlugin.CONFIG_FILE_PATH);
         this.messages = new LocalizedMessages(language);
+        this.executor = executor;
     }
 
     @Override
@@ -73,7 +75,7 @@ public class ExecPlugin implements ITaskProcessor {
 
     @Override
     public final ExecPlugin newInstance(final String language, final Map<String, String> settings) {
-        return new ExecPlugin(language, settings);
+        return new ExecPlugin(language, settings, new PythonScriptExecutor());
     }
 
     @Override
@@ -124,14 +126,14 @@ public class ExecPlugin implements ITaskProcessor {
     public final ITaskProcessorResult execute(final ITaskProcessorRequest request, final IEmailSettings emailSettings) {
         this.logger.info("Starting executor plugin: %s / %s", request, emailSettings);
         var pluginResult = new ExecResult();
-        var folderOut = Path.of(request.getFolderOut());
         var folderIn = Path.of(request.getFolderIn());
-        var pathToScript = inputs.get(config.getProperty("pathToScript"));
-        
-        pluginResult.setStatus(ITaskProcessorResult.Status.SUCCESS);
-        pluginResult.setErrorCode("OK");
+        var folderOut = Path.of(request.getFolderOut());
+        var pathToScript = Path.of(inputs.get(config.getProperty("pathToScript")));
+
+        pluginResult.setErrorCode("");
         pluginResult.setMessage(
-            String.format("Script: %s\nIn: %s\nOut: %s", pathToScript, folderIn, folderOut).toString());
+                String.format("Script: %s, In: %s, Out: %s",
+                        pathToScript, folderIn, folderOut));
         pluginResult.setRequestData(request);
         try {
             if (!Files.exists(folderOut)) {
@@ -142,16 +144,11 @@ public class ExecPlugin implements ITaskProcessor {
             }
             Files.write(folderIn.resolve("request.json"),
                     new ObjectMapper().writeValueAsBytes(request));
-            
-            Process proc = new ProcessBuilder()
-                    .inheritIO()
-                    .command("python3", pathToScript, 
-                            request.getFolderIn(), 
-                            request.getFolderOut())
-                    .start();
-            proc.waitFor();
-        } catch (IOException|InterruptedException ex) {
+            executor.execute(pathToScript, folderIn, folderOut);
+            pluginResult.setStatus(ITaskProcessorResult.Status.SUCCESS);
+        } catch (IOException | ExecException ex) {
             pluginResult.setStatus(ITaskProcessorResult.Status.ERROR);
+            pluginResult.setErrorCode("-1");
             pluginResult.setMessage(ex.toString());
         }
         return pluginResult;
