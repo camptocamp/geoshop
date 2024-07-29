@@ -33,7 +33,7 @@ RUN  cd /extract-build/extract/extract/ && \
 FROM tomcat:9.0.64-jre17
 LABEL Maintainer="andrey.rusakov@camptocamp.com" Vendor="Camptocamp"
 RUN apt update && apt upgrade -y && \
-    apt install -y python3 python3-gdal && \
+    apt install -y python3 python3-gdal python3-psycopg2 python3-geopandas python3-psycopg2 && \
     mkdir -p /var/extract/orders && mkdir -p /extract/
 COPY --from=builder /extract-build/extract/extract/target/extract##2.1-RELEASE.war /usr/local/tomcat/webapps/
 COPY script.py /extract/script.py
