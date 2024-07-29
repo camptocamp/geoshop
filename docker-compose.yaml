@@ -3,17 +3,24 @@ networks:
 
 services:
 
+    # Extract 
     extract:
         build: ./extract
         depends_on:
             pgsql:
                 condition: service_healthy
+            geodata:
+                condition: service_healthy                
         environment: 
             - JAVA_OPTS=-Xms1G -Xmx2G 
               -Dspring.datasource.url="jdbc:postgresql://pgsql:5432/extract" 
               -Dspring.datasource.username=extractuser 
               -Dspring.datasource.password=demopassword 
               -Duser.language=en -Duser.region=CH -Dcom.sun.jndi.ldap.connect.pool.timeout=20000
+            - GEODATA_POSTGRES_HOST=geodata
+            - GEODATA_POSTGRES_DB=geodata
+            - GEODATA_POSTGRES_USER=extractuser
+            - GEODATA_POSTGRES_PASSWORD=demopassword
         ports:
             - "8080:8080"
         healthcheck:
@@ -22,6 +29,52 @@ services:
             timeout: 10s
             retries: 15
 
+    # Extract/Postgres
+    pgsql:
+        image: postgres:12-alpine
+        environment:
+            - POSTGRES_DB=extract
+            - POSTGRES_USER=extractuser
+            - POSTGRES_PASSWORD=demopassword
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U extractuser -d postgres"]
+            interval: 5s
+            timeout: 5s
+            retries: 5
+
+    # Extract/Postgis
+    geodata:
+        image: postgis/postgis:12-3.4-alpine
+        environment:
+            - POSTGRES_DB=geodata
+            - POSTGRES_USER=extractuser
+            - POSTGRES_PASSWORD=demopassword
+        ports:
+            - "54320:5432"
+        volumes:
+          - ./extract/geodata:/docker-entrypoint-initdb.d/
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U extractuser -d postgres"]
+            interval: 5s
+            timeout: 5s
+            retries: 5
+
+    # Extract/Updatedb
+    updatedb:
+        image: postgres:12-alpine
+        depends_on:
+            extract:
+                condition: service_healthy
+        environment:
+            - PGHOST=pgsql
+            - PGDB=extract
+            - PGUSER=extractuser
+            - PGPASSWORD=demopassword
+        volumes:
+            - ./updatedb:/updatedb
+        entrypoint: /updatedb/update.sh
+
+    # Geoshop
     geoshop:
         build: ./geoshop
         depends_on: 
@@ -40,15 +93,13 @@ services:
             timeout: 10s
             retries: 15       
 
-    # Postgis
+    # Geoshop/Postgis
     postgis:
         image: postgis/postgis:12-3.4-alpine
         environment:
             - POSTGRES_DB=geoshop
             - POSTGRES_USER=geoshop
             - POSTGRES_PASSWORD=geoshop
-        ports:
-            - "54320:5432"
         volumes:
           - ./geoshop/postgis:/docker-entrypoint-initdb.d/
         healthcheck:
@@ -56,35 +107,6 @@ services:
             interval: 5s
             timeout: 5s
             retries: 5
-
-    # Postgres
-    pgsql:
-        image: postgres:12-alpine
-        environment:
-            - POSTGRES_DB=extract
-            - POSTGRES_USER=extractuser
-            - POSTGRES_PASSWORD=demopassword
-        ports:
-            - "5432:5432"
-        healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U extractuser -d postgres"]
-            interval: 5s
-            timeout: 5s
-            retries: 5
-
-    updatedb:
-        image: postgres:12-alpine
-        depends_on:
-            extract:
-                condition: service_healthy
-        environment:
-            - PGHOST=pgsql
-            - PGDB=extract
-            - PGUSER=extractuser
-            - PGPASSWORD=demopassword
-        volumes:
-            - ./updatedb:/updatedb
-        entrypoint: /updatedb/update.sh
 
     # Mailhog
     mailhog:
