@@ -13,7 +13,7 @@ services:
           geoshop:
               condition: service_healthy
       volumes:
-        - geoshop-files:/usr/share/nginx/html
+        - geoshop-files:/geoshop/media/
       ports:
         - "8000:80"
 
