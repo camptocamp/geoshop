@@ -1,7 +1,21 @@
 networks:
     qnetwork:
 
+volumes:
+  geoshop-files:
+
 services:
+
+    # Frontend
+    frontend: 
+      build: ./frontend
+      depends_on:
+          geoshop:
+              condition: service_healthy
+      volumes:
+        - geoshop-files:/usr/share/nginx/html
+      ports:
+        - "8000:80"
 
     # Extract 
     extract:
@@ -22,7 +36,7 @@ services:
             - GEODATA_POSTGRES_USER=extractuser
             - GEODATA_POSTGRES_PASSWORD=demopassword
         ports:
-            - "8080:8080"
+          - "8080:8080"
         healthcheck:
             test: curl --fail http://localhost:8080/extract || exit 1
             interval: 10s
@@ -85,8 +99,8 @@ services:
             - POSTGRES_USER=geoshop
             - POSTGRES_DB=geoshop
             - POSTGRES_PASSWORD=geoshop
-        ports: 
-            - "8000:8000"
+        volumes:
+            - geoshop-files:/geoshop/files
         healthcheck:
             test: curl --fail http://localhost:8000 || exit 1
             interval: 10s

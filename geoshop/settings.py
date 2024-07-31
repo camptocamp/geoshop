@@ -231,7 +231,7 @@ CSRF_COOKIE_SECURE = True
 # For large admin fields like order with order items
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000
 
-STATIC_URL = FORCE_SCRIPT_NAME + '/static/'
+STATIC_URL = ''
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_ROOT = os.environ.get('MEDIA_ROOT', os.path.join(BASE_DIR, 'files'))
 MEDIA_URL = os.environ.get('MEDIA_URL', FORCE_SCRIPT_NAME + '/files/')
