@@ -12,10 +12,17 @@ services:
       depends_on:
           geoshop:
               condition: service_healthy
+          extract:
+              condition: service_healthy              
+      environment:
+        - FRONTEND_HOST=localhost
+        - FRONTEND_PORT=8080
+        - GEOSHOP_BACKEND=http://geoshop:8000
+        - EXTRACT_FRONTEND=http://extract:8080
       volumes:
         - geoshop-files:/geoshop/media/
       ports:
-        - "8000:80"
+        - "8080:80"
 
     # Extract 
     extract:
@@ -35,8 +42,6 @@ services:
             - GEODATA_POSTGRES_DB=geodata
             - GEODATA_POSTGRES_USER=extractuser
             - GEODATA_POSTGRES_PASSWORD=demopassword
-        ports:
-          - "8080:8080"
         healthcheck:
             test: curl --fail http://localhost:8080/extract || exit 1
             interval: 10s
@@ -84,6 +89,7 @@ services:
             - PGDB=extract
             - PGUSER=extractuser
             - PGPASSWORD=demopassword
+            - GEOSHOP_BACKEND=http://geoshop:8000
         volumes:
             - ./updatedb:/updatedb
         entrypoint: /updatedb/update.sh
