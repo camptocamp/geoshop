@@ -11,7 +11,8 @@ clean:
 	docker compose rm -fsv
 
 test: build
-	docker compose up test --build --abort-on-container-exit
+	docker compose down
+	docker compose --env-file ./test.env up --build test
 
 acceptance: test
 	@echo Acceptance tests -- to be done

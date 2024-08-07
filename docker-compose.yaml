@@ -15,8 +15,8 @@ services:
           extract:
               condition: service_healthy
       environment:
-        - FRONTEND_HOST=frontend
-        - FRONTEND_PORT=80
+        - FRONTEND_HOST=${FRONTEND_HOST:-localhost}
+        - FRONTEND_PORT=${FRONTEND_PORT:-8080}
         - GEOSHOP_BACKEND=http://geoshop:8000
         - EXTRACT_FRONTEND=http://extract:8080
       volumes:
