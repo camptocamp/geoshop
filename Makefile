@@ -12,7 +12,7 @@ clean:
 
 test: build
 	docker compose down
-	docker compose --env-file ./test.env up --build test
+	docker compose --env-file ./test.env --profile testing up --build updatedb test
 
 acceptance: test
 	@echo Acceptance tests -- to be done

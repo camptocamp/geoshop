@@ -191,6 +191,8 @@ services:
     test:
         profiles: [testing]
         build: ./tests
+        networks:
+            - default
         depends_on:
             selenium:
                 condition: service_healthy
@@ -200,6 +202,8 @@ services:
     selenium:
         profiles: [testing]
         image: selenium/standalone-firefox
+        networks:
+            - default
         ports:
             - 4444:4444
         healthcheck:
