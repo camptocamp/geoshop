@@ -1,5 +1,7 @@
 networks:
     qnetwork:
+    geoshop:
+        driver: bridge
 
 volumes:
   geoshop-files:
@@ -96,8 +98,8 @@ services:
 
     # Geoshop
     geoshop:
-        build: ./geoshop
-        depends_on:
+        build: ./geoshop/back
+        depends_on: 
             postgis:
                 condition: service_healthy
         environment:
@@ -112,6 +114,32 @@ services:
             interval: 10s
             timeout: 10s
             retries: 15
+        ports:
+            - "8000:8000"
+        networks:
+            - geoshop
+            - default
+
+    # nginx_test:
+    #     image: nginx:latest
+    #     depends_on:
+    #         geoshop:
+    #             condition: service_healthy
+    #     ports:
+    #         - "8081:80"
+    #     networks:
+    #         - geoshop
+
+    # Geoshop Front End
+    geoshop_fe:
+        build: ./geoshop/front
+        depends_on:
+            geoshop:
+                condition: service_healthy
+        networks:
+            - geoshop
+        ports:
+            - "8085:8080"
 
     # Geoshop/Postgis
     postgis:

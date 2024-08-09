@@ -14,9 +14,10 @@ RUN apt update && \
     cd /geoshop/geoshop-back && \
     poetry install --only=main
 
+# FIXME: Add this through the containder od the composition
 COPY .env /geoshop/geoshop-back/.env
 COPY settings.py /geoshop/geoshop-back/settings.py
-COPY sampledata.sql /geoshop/sampledata.sql
+COPY resource/sampledata.sql /geoshop/sampledata.sql
 COPY entrypoint.sh /geoshop/entrypoint.sh
 
 # Copy default settings to settings only if there is no such file
