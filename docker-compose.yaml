@@ -120,16 +120,6 @@ services:
             - geoshop
             - default
 
-    # nginx_test:
-    #     image: nginx:latest
-    #     depends_on:
-    #         geoshop:
-    #             condition: service_healthy
-    #     ports:
-    #         - "8081:80"
-    #     networks:
-    #         - geoshop
-
     # Geoshop Front End
     geoshop_fe:
         build: ./geoshop/front
