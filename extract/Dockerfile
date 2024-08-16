@@ -9,7 +9,7 @@ ENV EXTRACT_VERSION="${EXTRACT_VERSION:-master}" \
 
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y git openjdk-21-jdk maven npm && \
+    apt-get install -y git openjdk-17-jdk maven npm && \
     npm install -g corepack && \
     git clone https://github.com/asit-asso/extract && \
     git clone https://github.com/sitn/sitn_geoshop_connector
@@ -41,7 +41,7 @@ RUN  cd /extract-build/extract/ && git checkout "${EXTRACT_VERSION}" && \
 FROM tomcat:9.0.64-jre17
 LABEL Maintainer="andrey.rusakov@camptocamp.com" Vendor="Camptocamp"
 RUN apt update && apt upgrade -y && \
-    apt install -y python3 python3-gdal python3-psycopg2 python3-geopandas python3-psycopg2 && \
+    apt install -y curl python3 python3-gdal python3-psycopg2 python3-geopandas python3-psycopg2 && \
     mkdir -p /var/extract/orders && mkdir -p /extract/
-COPY --from=builder /extract-build/extract-*.war /usr/local/tomcat/webapps/
+COPY --from=builder /extract-build/extract-*.war /usr/local/tomcat/webapps/extract.war
 COPY script.py /extract/script.py
