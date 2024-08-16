@@ -9,7 +9,7 @@ ENV EXTRACT_VERSION="${EXTRACT_VERSION:-master}" \
 
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y git openjdk-17-jdk maven npm && \
+    apt-get install -y git openjdk-21-jdk maven npm && \
     npm install -g corepack && \
     git clone https://github.com/asit-asso/extract && \
     git clone https://github.com/sitn/sitn_geoshop_connector
