@@ -19,4 +19,6 @@ else
 fi
 
 python3 manage.py collectstatic --noinput
+# TODO: translate all the languages or a defined one
+python3 manage.py compilemessages --locale=fr
 python3 manage.py runserver 0.0.0.0:8000

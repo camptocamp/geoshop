@@ -16,7 +16,7 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
-DROP DATABASE geoshop;
+DROP DATABASE IF EXISTS geoshop;
 --
 -- Name: geoshop; Type: DATABASE; Schema: -; Owner: geoshop
 --

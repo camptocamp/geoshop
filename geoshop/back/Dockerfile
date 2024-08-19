@@ -8,7 +8,7 @@ ENV  POETRY_NO_INTERACTION=1 \
      POETRY_HOME='/usr/local'
 
 RUN apt update && \
-    apt install -y git curl libgdal-dev libffi-dev postgresql && \
+    apt install -y git libgdal-dev libffi-dev gettext && \
     pip install poetry && \
     git clone https://github.com/camptocamp/geoshop-back.git /geoshop/geoshop-back && \
     cd /geoshop/geoshop-back && \
@@ -18,6 +18,4 @@ COPY settings.py /geoshop/geoshop-back/settings.py
 
 COPY entrypoint.sh /geoshop/entrypoint.sh
 
-# Copy default settings to settings only if there is no such file
-RUN mv -vn /geoshop/geoshop-back/default_settings.py /geoshop/geoshop-back/settings.py
 ENTRYPOINT [ "/geoshop/entrypoint.sh" ]
