@@ -101,7 +101,7 @@ services:
         depends_on:
             postgis:
                 condition: service_healthy
-        env_file: ./geoshop/.env
+        env_file: ./geoshop/${TEST_MODE:+test}.env
         volumes:
             - geoshop-files:/geoshop/files
         healthcheck:
