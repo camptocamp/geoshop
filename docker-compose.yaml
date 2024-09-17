@@ -1,224 +1,223 @@
 networks:
-    qnetwork:
+  qnetwork:
 
 volumes:
   geoshop-files:
 
 services:
+  # Frontend
+  frontend:
+    build: "./frontend"
+    depends_on:
+      geoshop:
+        condition: service_healthy
+      extract:
+        condition: service_healthy
+    environment:
+      - FRONTEND_HOST=${FRONTEND_HOST:-localhost}
+      - FRONTEND_PORT=${FRONTEND_PORT:-8080}
+      - GEOSHOP_BACKEND=http://geoshop:8000
+      - EXTRACT_FRONTEND=http://extract:8080
+    volumes:
+      - geoshop-files:/geoshop/media/
+    ports:
+      - "8080:80"
 
-    # Frontend
-    frontend:
-      build: ./frontend
-      depends_on:
-          geoshop:
-              condition: service_healthy
-          extract:
-              condition: service_healthy
-      environment:
-        - FRONTEND_HOST=${FRONTEND_HOST:-localhost}
-        - FRONTEND_PORT=${FRONTEND_PORT:-8080}
-        - GEOSHOP_BACKEND=http://geoshop:8000
-        - EXTRACT_FRONTEND=http://extract:8080
-      volumes:
-        - geoshop-files:/geoshop/media/
-      ports:
-        - "8080:80"
+  # Extract
+  extract:
+    build: ./extract
+    depends_on:
+      pgsql:
+        condition: service_healthy
+      geodata:
+        condition: service_healthy
+    environment:
+      - JAVA_OPTS=-Xms1G -Xmx2G
+        -Dspring.datasource.url="jdbc:postgresql://pgsql:5432/extract"
+        -Dspring.datasource.username=extractuser
+        -Dspring.datasource.password=demopassword
+        -Duser.language=en -Duser.region=CH -Dcom.sun.jndi.ldap.connect.pool.timeout=20000
+      - GEODATA_POSTGRES_HOST=geodata
+      - GEODATA_POSTGRES_DB=geodata
+      - GEODATA_POSTGRES_USER=extractuser
+      - GEODATA_POSTGRES_PASSWORD=demopassword
+    healthcheck:
+      test: curl --fail http://localhost:8080/extract || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 15
 
-    # Extract
-    extract:
-        build: ./extract
-        depends_on:
-            pgsql:
-                condition: service_healthy
-            geodata:
-                condition: service_healthy
-        environment:
-            - JAVA_OPTS=-Xms1G -Xmx2G
-              -Dspring.datasource.url="jdbc:postgresql://pgsql:5432/extract"
-              -Dspring.datasource.username=extractuser
-              -Dspring.datasource.password=demopassword
-              -Duser.language=en -Duser.region=CH -Dcom.sun.jndi.ldap.connect.pool.timeout=20000
-            - GEODATA_POSTGRES_HOST=geodata
-            - GEODATA_POSTGRES_DB=geodata
-            - GEODATA_POSTGRES_USER=extractuser
-            - GEODATA_POSTGRES_PASSWORD=demopassword
-        healthcheck:
-            test: curl --fail http://localhost:8080/extract || exit 1
-            interval: 10s
-            timeout: 10s
-            retries: 15
+  # Extract/Postgres
+  pgsql:
+    image: postgis/postgis:14-3.2-alpine
+    environment:
+      - POSTGRES_DB=extract
+      - POSTGRES_USER=extractuser
+      - POSTGRES_PASSWORD=demopassword
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U extractuser -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-    # Extract/Postgres
-    pgsql:
-        image: postgis/postgis:14-3.2-alpine
-        environment:
-            - POSTGRES_DB=extract
-            - POSTGRES_USER=extractuser
-            - POSTGRES_PASSWORD=demopassword
-        healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U extractuser -d postgres"]
-            interval: 5s
-            timeout: 5s
-            retries: 5
+  # Extract/Postgis
+  geodata:
+    image: postgis/postgis:14-3.2-alpine
+    environment:
+      - POSTGRES_DB=geodata
+      - POSTGRES_USER=extractuser
+      - POSTGRES_PASSWORD=demopassword
+    ports:
+      - "54320:5432"
+    volumes:
+      - ./extract/geodata:/docker-entrypoint-initdb.d/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U extractuser -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-    # Extract/Postgis
-    geodata:
-        image: postgis/postgis:14-3.2-alpine
-        environment:
-            - POSTGRES_DB=geodata
-            - POSTGRES_USER=extractuser
-            - POSTGRES_PASSWORD=demopassword
-        ports:
-            - "54320:5432"
-        volumes:
-          - ./extract/geodata:/docker-entrypoint-initdb.d/
-        healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U extractuser -d postgres"]
-            interval: 5s
-            timeout: 5s
-            retries: 5
+  # Extract/Updatedb
+  updatedb:
+    image: postgis/postgis:14-3.2-alpine
+    depends_on:
+      extract:
+        condition: service_healthy
+    environment:
+      - PGHOST=pgsql
+      - PGDB=extract
+      - PGUSER=extractuser
+      - PGPASSWORD=demopassword
+      - GEOSHOP_BACKEND=http://geoshop:8000
+    volumes:
+      - ./updatedb:/updatedb
+    entrypoint: /updatedb/update.sh
 
-    # Extract/Updatedb
-    updatedb:
-        image: postgis/postgis:14-3.2-alpine
-        depends_on:
-            extract:
-                condition: service_healthy
-        environment:
-            - PGHOST=pgsql
-            - PGDB=extract
-            - PGUSER=extractuser
-            - PGPASSWORD=demopassword
-            - GEOSHOP_BACKEND=http://geoshop:8000
-        volumes:
-            - ./updatedb:/updatedb
-        entrypoint: /updatedb/update.sh
+  # Geoshop
+  geoshop:
+    image: "ghcr.io/camptocamp/geoshop-api:latest"
+    depends_on:
+      postgis:
+        condition: service_healthy
+    env_file: ./geoshop/.env
+    volumes:
+      - geoshop-files:/geoshop/files
+    healthcheck:
+      test: curl --fail http://localhost:8000 || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 15
 
-    # Geoshop
-    geoshop:
-        build: ./geoshop/back
-        depends_on:
-            postgis:
-                condition: service_healthy
-        env_file: ./geoshop/.env
-        volumes:
-            - geoshop-files:/geoshop/files
-        healthcheck:
-            test: curl --fail http://localhost:8000 || exit 1
-            interval: 10s
-            timeout: 10s
-            retries: 15
+  # Geoshop Front End
+  # TODO: use env variables for the backend url and port
+  geoshop_fe:
+    image: "ghcr.io/camptocamp/geoshop-front:latest"
+    depends_on:
+      geoshop:
+        condition: service_healthy
+    ports:
+      # TODO repalce prot with env variable
+      - "8085:8080"
 
-    # Geoshop Front End
-    # TODO: use env variables for the backend url and port
-    geoshop_fe:
-        build: ./geoshop/front
-        depends_on:
-            geoshop:
-                condition: service_healthy
-        ports:
-        # TODO repalce prot with env variable
-            - "8085:8080"
+  # Geoshop/Postgis
+  postgis:
+    image: postgis/postgis:14-3.2-alpine
+    volumes:
+      - ./geoshop/resources/ini-scripts:/docker-entrypoint-initdb.d/:ro
+      - ./geoshop/resources/postgis_data:/var/lib/postgresql/data:rw
+    environment:
+      LANG: "en_US.utf8"
+      LC_COLLATE: "en_US.utf8"
+      LC_CTYPE: "en_US.utf8"
+    env_file: ./geoshop/.env
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U geoshop"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-    # Geoshop/Postgis
-    postgis:
-        image: postgis/postgis:14-3.2-alpine
-        volumes:
-          - ./geoshop/resources/ini-scripts:/docker-entrypoint-initdb.d/:ro
-          - ./geoshop/resources/postgis_data:/var/lib/postgresql/data:rw
-        environment:
-            LANG: 'en_US.utf8'
-            LC_COLLATE: 'en_US.utf8'
-            LC_CTYPE: 'en_US.utf8'
-        env_file: ./geoshop/.env
-        ports:
-            - "5432:5432"
-        healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U geoshop"]
-            interval: 5s
-            timeout: 5s
-            retries: 5
+  # Mailhog
+  mailhog:
+    image: mailhog/mailhog
+    tty: true
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    volumes:
+      - ./mailhog:/home/mailhog/conf
+    entrypoint: MailHog -auth-file=/home/mailhog/conf/auth-users
 
-    # Mailhog
-    mailhog:
-        image: mailhog/mailhog
-        tty: true
-        ports:
-            - "1025:1025"
-            - "8025:8025"
-        volumes:
-            - ./mailhog:/home/mailhog/conf
-        entrypoint: MailHog -auth-file=/home/mailhog/conf/auth-users
+  # LDAP
+  openldap:
+    image: osixia/openldap:1.5.0
+    environment:
+      - LDAP_ORGANISATION=Extract
+      - LDAP_DOMAIN=extract.org
+      - LDAP_ADMIN_PASSWORD=extract
+      - LDAP_CONFIG_PASSWORD=extract
+      - LDAP_RFC2307BIS_SCHEMA=true
+      - LDAP_REMOVE_CONFIG_AFTER_SETUP=true
+      - LDAP_TLS_VERIFY_CLIENT=try
+    ports:
+      - "389:389"
+      - "636:636"
 
-    # LDAP
-    openldap:
-        image: osixia/openldap:1.5.0
-        environment:
-            - LDAP_ORGANISATION=Extract
-            - LDAP_DOMAIN=extract.org
-            - LDAP_ADMIN_PASSWORD=extract
-            - LDAP_CONFIG_PASSWORD=extract
-            - LDAP_RFC2307BIS_SCHEMA=true
-            - LDAP_REMOVE_CONFIG_AFTER_SETUP=true
-            - LDAP_TLS_VERIFY_CLIENT=try
-        ports:
-            - "389:389"
-            - "636:636"
+  ldap-ad:
+    build: ./ldap-ad
+    volumes:
+      - ./ldap-ad/users.ldif:/ldap/users.ldif
+    ports:
+      - "10389:10389"
 
-    ldap-ad:
-        build: ./ldap-ad
-        volumes:
-            - ./ldap-ad/users.ldif:/ldap/users.ldif
-        ports:
-            - "10389:10389"
+  # QGIS
+  qgisserver:
+    image: camptocamp/qgis-server
+    volumes:
+      - ./qgis/project:/etc/qgisserver
+    environment:
+      - QGIS_PROJECT_FILE=/etc/qgisserver/world.qgs
+      - QGIS_SERVER_LANDING_PAGE_PROJECTS_DIRECTORIES=/etc/qgisserver
+    networks:
+      - qnetwork
 
-    # QGIS
-    qgisserver:
-        image: camptocamp/qgis-server
-        volumes:
-            - ./qgis/project:/etc/qgisserver
-        environment:
-            - QGIS_PROJECT_FILE=/etc/qgisserver/world.qgs
-            - QGIS_SERVER_LANDING_PAGE_PROJECTS_DIRECTORIES=/etc/qgisserver
-        networks:
-            - qnetwork
+  qgisproxy:
+    depends_on:
+      qgisserver:
+        condition: service_started
+    build:
+      context: ./qgis
+    hostname: qgisproxy
+    container_name: qgisproxy
+    volumes:
+      - ./qgis/nginx.conf:/etc/nginx/nginx/conf:ro
+    ports:
+      - 8888:80
+    networks:
+      - qnetwork
+      - default
 
-    qgisproxy:
-        depends_on:
-            qgisserver:
-                condition: service_started
-        build:
-            context: ./qgis
-        hostname: qgisproxy
-        container_name: qgisproxy
-        volumes:
-            - ./qgis/nginx.conf:/etc/nginx/nginx/conf:ro
-        ports:
-            - 8888:80
-        networks:
-            - qnetwork
-            - default
+  test:
+    profiles: [testing]
+    build: ./tests
+    networks:
+      - default
+    depends_on:
+      selenium:
+        condition: service_healthy
+      frontend:
+        condition: service_started
 
-    test:
-        profiles: [testing]
-        build: ./tests
-        networks:
-            - default
-        depends_on:
-            selenium:
-                condition: service_healthy
-            frontend:
-                condition: service_started
-
-    selenium:
-        profiles: [testing]
-        image: selenium/standalone-firefox
-        networks:
-            - default
-        ports:
-            - 4444:4444
-        healthcheck:
-            test: curl --fail http://localhost:4444/ || exit 1
-            interval: 10s
-            timeout: 10s
-            retries: 15
+  selenium:
+    profiles: [testing]
+    image: selenium/standalone-firefox
+    networks:
+      - default
+    ports:
+      - 4444:4444
+    healthcheck:
+      test: curl --fail http://localhost:4444/ || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 15
