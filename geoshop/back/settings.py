@@ -1,4 +1,5 @@
 import os
+import requests
 from dotenv import load_dotenv
 from django.utils.translation import gettext_lazy as _
 
@@ -78,6 +79,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'oidc.status',
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
@@ -264,3 +266,56 @@ SWISS_EXTENT = (2828694.200665463,1075126.8548189853,2484749.5514877755,1299777.
 
 # Controls values of metadata accessibility field that will turn the metadata public
 METADATA_PUBLIC_ACCESSIBILITIES = ['PUBLIC', 'APPROVAL_NEEDED']
+
+# OIDC configuration
+def discover_endpoints(discovery_url: str) -> dict:
+
+    """
+    Performs OpenID Connect discovery to retrieve the provider configuration.
+    """
+    response = requests.get(discovery_url)
+    if response.status_code != 200:
+        raise ValueError("Failed to retrieve provider configuration.")
+
+    provider_config = response.json()
+
+    # Extract endpoint URLs from provider configuration
+    return {
+        "authorization_endpoint": provider_config["authorization_endpoint"],
+        "token_endpoint": provider_config["token_endpoint"],
+        "userinfo_endpoint": provider_config["userinfo_endpoint"],
+        "jwks_uri": provider_config["jwks_uri"],
+        "introspection_endpoint": provider_config["introspection_endpoint"],
+    }
+
+AUTHENTICATION_BACKENDS = (
+    "django.contrib.auth.backends.ModelBackend",
+)
+
+OIDC_ENABLED = os.environ.get("OIDC_ENABLED", "False") == "True"
+if OIDC_ENABLED:
+    INSTALLED_APPS.append('mozilla_django_oidc')
+    MIDDLEWARE.append('mozilla_django_oidc.middleware.SessionRefresh')
+    AUTHENTICATION_BACKENDS = ("oidc.PermissionBackend", ) + AUTHENTICATION_BACKENDS
+
+    OIDC_RP_CLIENT_ID = os.environ.get("OIDC_RP_CLIENT_ID")
+    ZITADEL_PROJECT = os.environ.get("ZITADEL_PROJECT")
+    OIDC_RP_CLIENT_SECRET = os.environ.get("OIDC_RP_CLIENT_SECRET")
+    OIDC_OP_BASE_URL = os.environ.get("OIDC_OP_BASE_URL")
+
+    OIDC_RP_SIGN_ALGO = "RS256"
+    OIDC_RP_SCOPES = "openid profile email address phone"
+    OIDC_OP_DISCOVERY_ENDPOINT = OIDC_OP_BASE_URL + "/.well-known/openid-configuration"
+    OIDC_USE_PKCE = True
+
+    discovery_info = discover_endpoints(OIDC_OP_DISCOVERY_ENDPOINT)
+    OIDC_OP_AUTHORIZATION_ENDPOINT = discovery_info["authorization_endpoint"]
+    OIDC_OP_TOKEN_ENDPOINT = discovery_info["token_endpoint"]
+    OIDC_OP_USER_ENDPOINT = discovery_info["userinfo_endpoint"]
+    OIDC_OP_JWKS_ENDPOINT = discovery_info["jwks_uri"]
+    OIDC_OP_AUTHORIZATION_ENDPOINT = discovery_info["authorization_endpoint"]
+    OIDC_PRIVATE_KEYFILE = os.environ.get("OIDC_PRIVATE_KEYFILE")
+
+    LOGIN_REDIRECT_URL = os.environ.get("OIDC_REDIRECT_BASE_URL") + "/oidc/callback"
+    LOGOUT_REDIRECT_URL = os.environ.get("OIDC_REDIRECT_BASE_URL") + "/"
+    LOGIN_URL = os.environ.get("OIDC_REDIRECT_BASE_URL") + "/oidc/authenticate"
