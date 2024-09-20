@@ -10,8 +10,10 @@ SELENIUM_HOST = os.environ.get('SELENIUM_HOST', "http://selenium:4444") + "/wd/h
 FRONTEND_HOST = os.environ.get('FRONTEND_HOST', "http://frontend")
 
 REQUEST_PROCESS_WAIT = 20  # Seconds (Selenium default time unit)
-EXTRACT_DEMO_LOGIN = ("admin", "motdepasse21")
-GEOSHOP_DEMO_LOGIN = ("admin", "Test1234")
+
+# Geoshop and Extract testing credentials in the username:password format
+EXTRACT_DEMO_LOGIN = tuple(os.environ.get("EXTRACT_DEMO_LOGIN").split(":"))
+GEOSHOP_DEMO_LOGIN = tuple(os.environ.get("GEOSHOP_DEMO_LOGIN").split(":"))
 
 class ExtractGeoshopSmokeTest(unittest.TestCase):
 

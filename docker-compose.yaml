@@ -205,6 +205,9 @@ services:
         build: ./tests
         networks:
             - default
+        environment:
+            - GEOSHOP_DEMO_LOGIN=admin:Test1234
+            - EXTRACT_DEMO_LOGIN=admin:motdepasse21
         depends_on:
             selenium:
                 condition: service_healthy
