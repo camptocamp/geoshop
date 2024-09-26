@@ -11,8 +11,8 @@ build:
 clean:
 	docker compose rm -fsv
 
-test: build
-	docker compose down
+test:
+	docker compose --env-file ./test.env down
 	docker compose --env-file ./test.env --profile testing up --build updatedb test
 
 acceptance: test

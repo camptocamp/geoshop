@@ -9,8 +9,6 @@ SELENIUM_LOCAL = os.environ.get('SELENIUM_LOCAL', 'False') == 'True'
 SELENIUM_HOST = os.environ.get('SELENIUM_HOST', "http://selenium:4444") + "/wd/hub"
 FRONTEND_HOST = os.environ.get('FRONTEND_HOST', "http://frontend")
 
-REQUEST_PROCESS_WAIT = 20  # Seconds (Selenium default time unit)
-
 # Geoshop and Extract testing credentials in the username:password format
 EXTRACT_DEMO_LOGIN = tuple(os.environ.get("EXTRACT_DEMO_LOGIN").split(":"))
 GEOSHOP_DEMO_LOGIN = tuple(os.environ.get("GEOSHOP_DEMO_LOGIN").split(":"))
@@ -34,8 +32,8 @@ class ExtractGeoshopSmokeTest(unittest.TestCase):
         self.assertEqual(
             self._driver.find_element(By.TAG_NAME, "title").get_attribute("innerText"),
             "Geoshop API"
-        ) 
-        
+        )
+
         # Login
         self._driver.find_element(By.LINK_TEXT, "Admin").click()
         self._driver.find_element(By.ID, "id_username").send_keys(GEOSHOP_DEMO_LOGIN[0])
@@ -56,7 +54,6 @@ class ExtractGeoshopSmokeTest(unittest.TestCase):
 
 
     def test_extractLoginLogout(self):
-        return
         self._driver.get(f"{FRONTEND_HOST}/extract")
         self.assertEqual(
             self._driver.find_element(By.TAG_NAME, "title").get_attribute("innerText"),
@@ -77,8 +74,7 @@ class ExtractGeoshopSmokeTest(unittest.TestCase):
         self._driver.find_element(By.ID, "logoutLink").click()
         self.assertEqual(
             self._driver.find_element(By.TAG_NAME, "title")
-            .get_attribute("innerText")
-            .strip(),
+            .get_attribute("innerText"),
             "Extract",
         )
 
