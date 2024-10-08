@@ -24,6 +24,11 @@ services:
         - geoshop-files:/geoshop/media/
       ports:
         - "8080:80"
+      healthcheck:
+          test: ( curl -L --fail http://localhost/extract | grep '<title>Extract</title>' && curl -L --fail http://localhost/geoshop ) || exit 1
+          interval: 10s
+          timeout: 10s
+          retries: 15
 
     # Extract
     extract:
@@ -44,7 +49,7 @@ services:
             - GEODATA_POSTGRES_USER=extractuser
             - GEODATA_POSTGRES_PASSWORD=demopassword
         healthcheck:
-            test: curl --fail http://localhost:8080/extract || exit 1
+            test: curl -L --fail http://localhost:8080/extract || exit 1
             interval: 10s
             timeout: 10s
             retries: 15
@@ -105,7 +110,7 @@ services:
         volumes:
             - geoshop-files:/geoshop/files
         healthcheck:
-            test: curl --fail http://localhost:8000 || exit 1
+            test: curl -L --fail http://localhost:8000 || exit 1
             interval: 10s
             timeout: 10s
             retries: 15
@@ -203,28 +208,23 @@ services:
     test:
         profiles: [testing]
         build: ./tests
-        networks:
-            - default
         environment:
             - GEOSHOP_DEMO_LOGIN=${GEOSHOP_DEMO_LOGIN}
             - EXTRACT_DEMO_LOGIN=${EXTRACT_DEMO_LOGIN}
+            - TEST_OUTPUT=${TEST_OUTPUT:-/test_output/}
+        volumes:
+          - ./test_output:${TEST_OUTPUT:-/test_output/}
         depends_on:
             selenium:
                 condition: service_healthy
-            extract:
-                condition: service_healthy
-            geoshop:
-                condition: service_healthy
             frontend:
-                condition: service_started
+                condition: service_healthy
 
     selenium:
         profiles: [testing]
         image: selenium/standalone-firefox
-        networks:
-            - default
         ports:
-            - 4444:4444
+            - 5900:5900
         healthcheck:
             test: curl --fail http://localhost:4444/ || exit 1
             interval: 10s
