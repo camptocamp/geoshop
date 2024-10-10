@@ -15,7 +15,7 @@ RUN apt update && \
     poetry install --only=main
 
 COPY settings.py /geoshop/geoshop-back/settings.py
-
+COPY login.html /geoshop/geoshop-back/api/templates/admin/login.html
 COPY entrypoint.sh /geoshop/entrypoint.sh
 
 ENTRYPOINT [ "/geoshop/entrypoint.sh" ]

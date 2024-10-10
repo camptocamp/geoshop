@@ -4,6 +4,7 @@ networks:
 
 volumes:
   geoshop-files:
+  zitadel-files:
 
 services:
 
@@ -106,9 +107,10 @@ services:
         depends_on:
             postgis:
                 condition: service_healthy
-        env_file: ./geoshop/.env
+        env_file: ./geoshop/${TEST_MODE+test}.env
         volumes:
             - geoshop-files:/geoshop/files
+            - zitadel-files:/zitadel-files
         healthcheck:
             test: curl -L --fail http://localhost:8000 || exit 1
             interval: 10s
@@ -219,6 +221,8 @@ services:
                 condition: service_healthy
             frontend:
                 condition: service_healthy
+            zitadel:
+                condition: service_started
 
     selenium:
         profiles: [testing]
@@ -230,3 +234,14 @@ services:
             interval: 10s
             timeout: 10s
             retries: 15
+
+    zitadel:
+        build: zitadel
+        volumes:
+          - zitadel-files:/zitadel/files
+        ports:
+          - 9998:9998
+        environment:
+            - PORT=9998
+            - USERS_FILE=/zitadel/users.json
+            - REDIRECT_URIS=http://frontend/geoshop/oidc/callback,https://frontend:80/geoshop/oidc/callback,http://frontend:80/geoshop/oidc/callback,http://frontend/geoshop/auth/oidc
