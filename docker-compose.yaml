@@ -213,6 +213,7 @@ services:
         environment:
             - GEOSHOP_DEMO_LOGIN=${GEOSHOP_DEMO_LOGIN}
             - EXTRACT_DEMO_LOGIN=${EXTRACT_DEMO_LOGIN}
+            - ZITADEL_DEMO_LOGIN=${ZITADEL_DEMO_LOGIN}
             - TEST_OUTPUT=${TEST_OUTPUT:-/test_output/}
         volumes:
           - ./test_output:${TEST_OUTPUT:-/test_output/}
@@ -244,4 +245,6 @@ services:
         environment:
             - PORT=9998
             - USERS_FILE=/zitadel/users.json
+            - ISSUER=http://zitadel:9998
+            - DEV_MODE=true
             - REDIRECT_URIS=http://frontend/geoshop/oidc/callback,https://frontend:80/geoshop/oidc/callback,http://frontend:80/geoshop/oidc/callback,http://frontend/geoshop/auth/oidc
