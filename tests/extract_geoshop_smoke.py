@@ -16,6 +16,7 @@ TEST_OUTPUT = os.environ.get("TEST_OUTPUT", "/test_output")
 # Geoshop and Extract testing credentials in the username:password format
 EXTRACT_DEMO_LOGIN = tuple(os.environ.get("EXTRACT_DEMO_LOGIN").split(":"))
 GEOSHOP_DEMO_LOGIN = tuple(os.environ.get("GEOSHOP_DEMO_LOGIN").split(":"))
+ZITADEL_DEMO_LOGIN = tuple(os.environ.get("ZITADEL_DEMO_LOGIN").split(":"))
 
 logger = logging.getLogger()
 logger.level = logging.DEBUG
@@ -69,7 +70,32 @@ class ExtractGeoshopSmokeTest(unittest.TestCase):
         self._driver.find_element(By.CSS_SELECTOR, "#logout-form button").click()
         self.assertEqual(
             self._driver.find_element(By.TAG_NAME, "title").get_attribute("innerText"),
-            "Logged out | GeoShop Admin",
+            "Geoshop API",
+        )
+
+    def test_geoshopOIDCLoginLogout(self):
+        logger.info("Starting Geoshop OIDC login/logout test")
+        self._driver.get(f"{FRONTEND_HOST}/geoshop")
+        self.assertEqual(
+            self._driver.find_element(By.TAG_NAME, "title").get_attribute("innerText"),
+            "Geoshop API",
+        )
+
+        # Login
+        self._driver.find_element(By.LINK_TEXT, "Log in").click()
+        self._driver.find_element(By.CSS_SELECTOR, "input[value='Login with Zitadel']").click()
+        self._driver.find_element(By.ID, "username").send_keys(ZITADEL_DEMO_LOGIN[0])
+        self._driver.find_element(By.ID, "password").send_keys(ZITADEL_DEMO_LOGIN[1])
+        self._driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
+
+        # Django replaces "Log in" button with username if user is logged on
+        self._driver.find_element(By.LINK_TEXT, ZITADEL_DEMO_LOGIN[0])
+
+        # Logout
+        self._driver.find_element(By.CSS_SELECTOR, "#logoutForm").submit()
+        self.assertEqual(
+            self._driver.find_element(By.TAG_NAME, "title").get_attribute("innerText"),
+            "Geoshop API",
         )
 
     def test_extractLoginLogout(self):
@@ -99,6 +125,8 @@ class ExtractGeoshopSmokeTest(unittest.TestCase):
             "Extract",
         )
 
+    def test_extractOIDCLoginLogout(self):
+        pass
 
 if __name__ == "__main__":
     unittest.main()
