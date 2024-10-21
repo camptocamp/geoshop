@@ -1,5 +1,5 @@
 {
-  "apiUrl": "http://localhost:8085/geoshop/",
+  "apiUrl": "http://geoshop_fe/geoshop",
   "mediaUrl": "",
   "baseMapUrl": "https://wmts.geo.admin.ch/1.0.0/{layer}/{style}/current/{TileMatrixSet}/{TileMatrix}/{TileCol}/{TileRow}",
   "geocoderUrl": "https://nominatim.openstreetmap.org/search",
