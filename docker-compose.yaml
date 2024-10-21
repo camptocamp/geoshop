@@ -15,6 +15,8 @@ services:
         condition: service_healthy
       extract:
         condition: service_healthy
+          geoshop_fe:
+              condition: service_healthy
     environment:
       - FRONTEND_HOST=${FRONTEND_HOST:-localhost}
       - FRONTEND_PORT=${FRONTEND_PORT:-8080}
@@ -112,16 +114,18 @@ services:
       timeout: 10s
       retries: 15
 
-  # Geoshop Front End
-  # TODO: use env variables for the backend url and port
+    # Geoshop Front End
+    # TODO: use env variables for the backend url and port
   geoshop_fe:
     build: ./geoshop/front
     depends_on:
       geoshop:
         condition: service_healthy
-    ports:
-      # TODO repalce prot with env variable
-      - "8085:8080"
+    healthcheck:
+      test: curl -L --fail http://geoshop_fe/ || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 15
 
   # Geoshop/Postgis
   postgis:
