@@ -46,3 +46,7 @@ RUN apt update && apt upgrade -y && \
 COPY --from=builder /extract-build/extract-*.war /usr/local/tomcat/webapps/extract.war
 COPY tomcat/conf/context.xml /usr/local/tomcat/conf/context.xml
 COPY script.py /extract/script.py
+
+RUN mkdir -p /var/log/extract
+RUN chown -R www-data:www-data /usr/local/tomcat/ /var/log/extract/
+USER 33
