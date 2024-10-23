@@ -16,6 +16,9 @@ RUN apt-get update && \
 
 COPY extract-task-exec /extract-build/extract-task-exec
 
+# Copy custom application.properties file to the build folder
+COPY config/application.properties /extract-build/application.properties
+
 RUN cd /extract-build/sitn_geoshop_connector/ && git checkout "${GEOSHOP_CONNECTOR_VERSION}" && \
     cd /extract-build/sitn_geoshop_connector/plugin-interface && \
     mvn clean install && \
@@ -23,6 +26,7 @@ RUN cd /extract-build/sitn_geoshop_connector/ && git checkout "${GEOSHOP_CONNECT
     mvn clean install && \
     cp target/extract-connector-geoshop-*.jar /extract-build/extract/extract/src/main/resources/connectors && \
     cd /extract-build/extract/ && git checkout "${EXTRACT_VERSION}" && \
+    cp /extract-build/application.properties /extract-build/extract/extract/src/main/resources/application.properties && \
     cd /extract-build/extract/extract-interface && \
     mvn clean install && \
     cd /extract-build/extract-task-exec && \
@@ -40,6 +44,14 @@ RUN cd /extract-build/extract/ && git checkout "${EXTRACT_VERSION}" && \
 # Extract service
 FROM tomcat:9.0.64-jre17
 LABEL Maintainer="andrey.rusakov@camptocamp.com" Vendor="Camptocamp"
+
+ENV GEODATA_POSTGRES_HOST="${GEODATA_POSTGRES_HOST:-pgsql}" \
+    GEODATA_POSTGRES_PORT="${GEODATA_POSTGRES_PORT:-5432}" \
+    GEODATA_POSTGRES_USER="${GEODATA_POSTGRES_USER:-extractuser}" \
+    GEODATA_POSTGRES_PASSWORD="${GEODATA_POSTGRES_PASSWORD:-demopassword}" \
+    GEODATA_POSTGRES_DB="${GEODATA_POSTGRES_DB:-extract}" \
+    EXTERNAL_URL="${EXTERNAL_URL:-http://localhost:8080}"
+
 RUN apt update && apt upgrade -y && \
     apt install -y curl python3 python3-psycopg2 && \
     mkdir -p /var/extract/orders && mkdir -p /extract/
