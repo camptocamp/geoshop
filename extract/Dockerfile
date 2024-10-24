@@ -60,5 +60,5 @@ COPY tomcat/conf/context.xml /usr/local/tomcat/conf/context.xml
 COPY script.py /extract/script.py
 
 RUN mkdir -p /var/log/extract
-RUN chown -R www-data:www-data /usr/local/tomcat/ /var/log/extract/
+RUN chown -R www-data:www-data /usr/local/tomcat/ /var/log/extract/ /var/extract/orders /extract/
 USER 33
