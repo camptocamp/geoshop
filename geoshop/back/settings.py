@@ -29,6 +29,7 @@ EMAIL_PORT = os.environ.get('EMAIL_PORT', 1025)
 # Setting to test email sending in console
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
 
+DEFAULT_EXTENT = (2828694.200665463,1075126.8548189853,2484749.5514877755,1299777.3195268118)
 #
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'DEFAUL_FROM_EMAIL@example.com')
 ADMIN_EMAIL_LIST = os.environ.get('ADMIN_EMAIL_LIST', 'ADMIN_EMAIL_LIST@example.com')
@@ -319,3 +320,25 @@ if OIDC_ENABLED:
     LOGIN_REDIRECT_URL = os.environ.get("OIDC_REDIRECT_BASE_URL") + "/oidc/callback"
     LOGOUT_REDIRECT_URL = os.environ.get("OIDC_REDIRECT_BASE_URL") + "/"
     LOGIN_URL = os.environ.get("OIDC_REDIRECT_BASE_URL") + "/oidc/authenticate"
+
+# Customize openlayers widget used in admin interface
+OLWIDGET = {
+    "globals": {
+        "srid": DEFAULT_SRID,
+        "extent": [2420000, 130000, 2900000, 1350000],
+        "resolutions": [
+            4000, 3750, 3500, 3250, 3000, 2750, 2500, 2250, 2000, 1750, 1500, 1250,
+            1000, 750, 650, 500, 250, 100, 50, 20, 10, 5, 2.5, 2, 1.5, 1, 0.5
+        ],
+    },
+    "wmts": {
+        "layer_name": 'ch.kantone.cadastralwebmap-farbe',
+        "style": 'default',
+        "matrix_set": '2056',
+        "attributions": '<a target="new" href="https://www.swisstopo.admin.ch/internet/swisstopo/en/home.html"'
+            + '>swisstopo</a>', # optional
+        "url_template": 'https://wmts10.geo.admin.ch/1.0.0/{Layer}/default/current/2056/{TileMatrix}/{TileCol}/{TileRow}.png',
+        "request_encoding": 'REST', # optional
+        "format": 'image/png' # optional
+    }
+}
