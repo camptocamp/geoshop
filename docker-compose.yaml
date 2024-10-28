@@ -15,8 +15,8 @@ services:
         condition: service_healthy
       extract:
         condition: service_healthy
-          geoshop_fe:
-              condition: service_healthy
+      geoshop_fe:
+        condition: service_healthy
     environment:
       - FRONTEND_HOST=${FRONTEND_HOST:-localhost}
       - FRONTEND_PORT=${FRONTEND_PORT:-8080}
@@ -246,4 +246,4 @@ services:
       - USERS_FILE=/zitadel/users.json
       - ISSUER=http://zitadel:9998
       - DEV_MODE=true
-      - REDIRECT_URIS=http://frontend/geoshop/oidc/callback,https://frontend:80/geoshop/oidc/callback,http://frontend:80/geoshop/oidc/callback,http://frontend/geoshop/auth/oidc
+      - REDIRECT_URI=http://frontend/geoshop/oidc/callback,https://frontend:80/geoshop/oidc/callback,http://frontend:80/geoshop/oidc/callback,http://frontend/geoshop/auth/oidc
