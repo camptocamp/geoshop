@@ -4,6 +4,7 @@ import time
 import unittest
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
@@ -101,7 +102,7 @@ class ExtractGeoshopSmokeTest(unittest.TestCase):
         )
 
     def test_geoshopFrontendLoginLogout(self):
-        logger.info("Starting Geoshop Frontend OIDC login/logout test")
+        logger.info("Starting Geoshop Frontend login/logout test")
         self._driver.get(GEOSHOP_FE_HOST)
         self.assertEqual(
             self._driver.find_element(By.TAG_NAME, "title").get_attribute("innerText"),
@@ -155,8 +156,47 @@ class ExtractGeoshopSmokeTest(unittest.TestCase):
             "Extract",
         )
 
-    def test_extractOIDCLoginLogout(self):
-        pass
+    # TODO: extract into a separate file for testing user actions
+    def test_geoshopMakeOrder(self):
+        logger.info("Starting Geoshop Frontend login/logout test")
+        self._driver.get(GEOSHOP_FE_HOST)
+        self.assertEqual(
+            self._driver.find_element(By.TAG_NAME, "title").get_attribute("innerText"),
+            "GeoShop",
+        )
+
+        # Login
+        self._driver.find_element(By.CSS_SELECTOR, ".right-container button:nth-of-type(2)").click()
+        self._driver.find_element(By.CSS_SELECTOR, ".mat-menu-content button").click()
+        self._driver.find_element(By.CSS_SELECTOR, "input:nth-of-type(1)").send_keys(GEOSHOP_DEMO_LOGIN[0])
+        self._driver.find_element(By.CSS_SELECTOR, "input[type='password']").send_keys(GEOSHOP_DEMO_LOGIN[1])
+        self._driver.find_element(By.CSS_SELECTOR, ".form-login-button").click()
+
+        # Draw a rectangle
+        WebDriverWait(self._driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, ".map-button-container")))
+        self._driver.find_element(By.CSS_SELECTOR, ".map-button-container button:nth-of-type(2)").click()
+        map = self._driver.find_element(By.ID, "map")
+        ActionChains(self._driver).move_to_element(map).move_by_offset(100, 100).click().move_by_offset(200, 200).click().perform()
+
+        # Make an order
+        self._driver.find_element(By.CSS_SELECTOR, "button.item-cart").click()
+        self._driver.find_element(By.CSS_SELECTOR, ".right-container button:nth-of-type(3)").click()
+        self._driver.find_element(By.CSS_SELECTOR, ".mat-menu-panel button.action-button:nth-of-type(2)").click()
+        self._driver.find_element(By.ID, "mat-select-0").click()
+        self._driver.find_element(By.ID, "mat-option-1").click()
+        self._driver.find_element(By.ID, "mat-input-6").send_keys("Test input title")
+        self._driver.find_element(By.ID, "mat-input-8").send_keys("Test input description")
+        self._driver.find_element(By.CSS_SELECTOR, ".mat-stepper-next").click()
+        self._driver.find_element(By.CSS_SELECTOR, ".bottom-container button:nth-of-type(3)").click()
+        self._driver.find_element(By.ID, "mat-select-value-3").click()
+        self._driver.find_element(By.CSS_SELECTOR, ".mat-option:nth-of-type(2)").click()
+        self._driver.find_element(By.CSS_SELECTOR, "#cdk-step-content-0-2 button:nth-of-type(3)").click()
+        self._driver.find_element(By.CSS_SELECTOR, "simple-snack-bar button").click()
+
+        # Logout
+        self._driver.find_element(By.CSS_SELECTOR, ".right-container button:nth-of-type(2)").click()
+        self._driver.find_element(By.CSS_SELECTOR, ".mat-menu-content button:nth-of-type(3)").click()
 
 if __name__ == "__main__":
     unittest.main()

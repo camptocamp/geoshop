@@ -6,11 +6,11 @@ RUN apt update && \
     apt upgrade -y && \
     apt install -y git && \
     git clone https://github.com/camptocamp/geoshop-front.git . && \
-    npm ci
+    npm ci --force
 
 COPY config.json src/assets/configs/config.json
 
-RUN npm run build
+RUN npm run build --force
 
 # Serve with nginx unpprevileged
 FROM nginxinc/nginx-unprivileged:stable
