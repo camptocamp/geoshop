@@ -114,8 +114,8 @@ services:
       timeout: 10s
       retries: 15
 
-    # Geoshop Front End
-    # TODO: use env variables for the backend url and port
+  # Geoshop Front End
+  # TODO: use env variables for the backend url and port
   geoshop_fe:
     build: ./geoshop/front
     depends_on:
