@@ -53,7 +53,7 @@ ENV GEODATA_POSTGRES_HOST="${GEODATA_POSTGRES_HOST:-pgsql}" \
     EXTERNAL_URL="${EXTERNAL_URL:-http://localhost:8080}"
 
 RUN apt update && apt upgrade -y && \
-    apt install -y curl python3 python3-psycopg2 && \
+    apt install -y curl python3 python3-gdal python3-geopandas python3-psycopg2 && \
     mkdir -p /var/extract/orders && mkdir -p /extract/
 COPY --from=builder /extract-build/extract-*.war /usr/local/tomcat/webapps/extract.war
 COPY tomcat/conf/context.xml /usr/local/tomcat/conf/context.xml
