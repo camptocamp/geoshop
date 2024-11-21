@@ -1,8 +1,8 @@
-INSERT INTO connectors(id_connector, active, connector_code, connector_label, connector_params, import_freq, 
+INSERT INTO connectors(id_connector, active, connector_code, connector_label, connector_params, import_freq,
                        last_import_date, last_import_msg, name, error_count, max_retries)
-VALUES(1, false, 'easysdiv4', 'EasySdi V4', 
-       '{"uploadSize":"","detailsUrl":"","pass":"tititoto","login":"dev_test","url":"http://ags104-demo.arxit.com/Projets/6084_ASITVD/asitvd.xml"}', 
-       240, '2022-10-11 15:42:21.259', 'Une erreur est survenue lors de la tentative d import des commandes : ags104-demo.arxit.com: Name or service not known', 
+VALUES(1, false, 'easysdiv4', 'EasySdi V4',
+       '{"uploadSize":"","detailsUrl":"","pass":"tititoto","login":"dev_test","url":"http://ags104-demo.arxit.com/Projets/6084_ASITVD/asitvd.xml"}',
+       240, '2022-10-11 15:42:21.259', 'Une erreur est survenue lors de la tentative d import des commandes : ags104-demo.arxit.com: Name or service not known',
        'Bouchon', 0, 0);
 
 INSERT INTO processes(id_process, name)
@@ -11,9 +11,9 @@ VALUES(1, 'Traitement test');
 INSERT INTO tasks(id_task, task_code, task_label, task_params, position, id_process)
 VALUES(1, 'VALIDATION', 'Validation opérateur', '{"reject_msgs":"","valid_msgs":""}', 1, 1);
 
-INSERT INTO requests(id_request, p_client, p_clientdetails, end_date, folder_in, folder_out, p_orderguid, p_orderlabel, 
-                     p_organism, p_parameters, p_perimeter, p_productguid, p_productlabel, rejected, remark, start_date, 
-                     status, tasknum, p_tiers, p_tiersdetails, id_connector, id_process, p_surface, p_clientguid, 
+INSERT INTO requests(id_request, p_client, p_clientdetails, end_date, folder_in, folder_out, p_orderguid, p_orderlabel,
+                     p_organism, p_parameters, p_perimeter, p_productguid, p_productlabel, rejected, remark, start_date,
+                     status, tasknum, p_tiers, p_tiersdetails, id_connector, id_process, p_surface, p_clientguid,
                      p_organismguid, p_external_url, p_tiersguid)
 VALUES (1, 'Yves Grasset', 'Boulevard de Grancy 56
 1006 Lausanne
@@ -25,9 +25,9 @@ ygr@arxit.com', NULL, 'abc2953b-2ad6-4caf-a9c9-75968f3320fa/input', 'abc2953b-2a
         'STANDBY', 1, '', '', 1, 1, '1485134', '41320d0f-3130-4c4c-974a-0c4d3bde1749',
         'a35f0327-bceb-43a1-b366-96c3a94bc47b', 'https://int.viageo.ch/commandes/435747', '');
 
-INSERT INTO requests(id_request, p_client, p_clientdetails, end_date, folder_in, folder_out, p_orderguid, p_orderlabel, 
-                     p_organism, p_parameters, p_perimeter, p_productguid, p_productlabel, rejected, remark, start_date, 
-                     status, tasknum, p_tiers, p_tiersdetails, id_connector, id_process, p_surface, p_clientguid, 
+INSERT INTO requests(id_request, p_client, p_clientdetails, end_date, folder_in, folder_out, p_orderguid, p_orderlabel,
+                     p_organism, p_parameters, p_perimeter, p_productguid, p_productlabel, rejected, remark, start_date,
+                     status, tasknum, p_tiers, p_tiersdetails, id_connector, id_process, p_surface, p_clientguid,
                      p_organismguid, p_external_url, p_tiersguid)
 VALUES (2, 'Yves Grasset', 'Boulevard de Grancy 56
 1006 Lausanne
@@ -40,12 +40,12 @@ ygr@arxit.com', NULL, '1ddb76a6-2610-47c3-bde2-7a72f7425855/input', '1ddb76a6-26
         'ERROR', 1, '', '', 1, 1, '34792', '4b01553d-9766-4014-9166-3f00f58adfc7', 'a35f0327-bceb-43a1-b366-96c3a94bc47b',
         'https://int.viageo.ch/commandes/443530', '');
 
-INSERT INTO requests(id_request, p_client, p_clientdetails, end_date, folder_in, folder_out, p_orderguid, p_orderlabel, 
-                     p_organism, p_parameters, p_perimeter, p_productguid, p_productlabel, rejected, remark, start_date, 
-                     status, tasknum, p_tiers, p_tiersdetails, id_connector, id_process, p_surface, p_clientguid, 
+INSERT INTO requests(id_request, p_client, p_clientdetails, end_date, folder_in, folder_out, p_orderguid, p_orderlabel,
+                     p_organism, p_parameters, p_perimeter, p_productguid, p_productlabel, rejected, remark, start_date,
+                     status, tasknum, p_tiers, p_tiersdetails, id_connector, id_process, p_surface, p_clientguid,
                      p_organismguid, p_external_url, p_tiersguid)
 VALUES (3, 'DavidTEST BeniTEST', 'Avenue de la Praille 45
-1227 Carouge', '2017-08-25 17:13:56.371', 'c05b9afc-5d06-4377-b22c-cccd0dea9aff/input', 
+1227 Carouge', '2017-08-25 17:13:56.371', 'c05b9afc-5d06-4377-b22c-cccd0dea9aff/input',
         'c05b9afc-5d06-4377-b22c-cccd0dea9aff/output', '29740951-6bc9-b164-bd27-4c84079b49c6', '227976','arx iT DEV-TESTS',
         '{"FORMAT" : "SHP", "PROJECTION" : "SWITZERLAND"}',
         'POLYGON((6.305801504197224 46.34034193773002, 6.300574962196896 46.58949427029274, 6.976470602791147 46.59425513709236, 6.978595958249548 46.34508114541769, 6.305801504197224 46.34034193773002))',
