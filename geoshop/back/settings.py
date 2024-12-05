@@ -342,3 +342,11 @@ OLWIDGET = {
         "format": 'image/png' # optional
     }
 }
+
+MAX_ORDER_AREA=0
+
+FEATURE_FLAGS = {
+    "oidc": os.environ.get("OIDC_ENABLED", "False") == "False",
+    "registration": os.environ.get("REGISTRATION_ENABLED", "False") == "False",
+}
+
