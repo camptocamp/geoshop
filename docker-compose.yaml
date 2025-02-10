@@ -1,44 +1,61 @@
-networks:
-  default:
-  qnetwork:
-
-volumes:
-  geoshop-files:
-  zitadel-files:
-
 services:
-  # Frontend
-  frontend:
-    build: ./frontend
+  geoshop-back:
+    build: ./geoshop-back
     depends_on:
-      geoshop:
+      geoshop-back-db:
         condition: service_healthy
-      extract:
-        condition: service_healthy
-      geoshop_fe:
-        condition: service_healthy
-    environment:
-      - FRONTEND_HOST=${FRONTEND_HOST:-localhost}
-      - FRONTEND_PORT=${FRONTEND_PORT:-8080}
-      - GEOSHOP_BACKEND=http://geoshop:8000
-      - EXTRACT_FRONTEND=http://extract:8080
-    volumes:
-      - geoshop-files:/geoshop/media/
+      geoshop-back-db-migrate:
+        condition: service_completed_successfully
+    env_file: ./geoshop-back/geoshop-back.env
+    command: gunicorn wsgi -b :8000 --timeout 90
     ports:
-      - "8080:80"
+      - 8000:8000
     healthcheck:
-      test: ( curl -L --fail http://localhost/extract | grep '<title>Extract</title>' && curl -L --fail http://localhost/geoshop ) || exit 1
+      test: curl -L --fail http://localhost:8000 || exit 1
       interval: 10s
       timeout: 10s
       retries: 15
 
-  # Extract
+  geoshop-back-db:
+    image: postgis/postgis:14-3.2-alpine
+    env_file: ./geoshop-back/geoshop-back.env
+    volumes:
+      - "./geoshop-back/db:/docker-entrypoint-initdb.d:ro"
+    healthcheck:
+      test: pg_isready -h 127.0.0.1 -U geoshop -d geoshop
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  geoshop-back-db-migrate:
+    build: ./geoshop-back
+    depends_on:
+      geoshop-back-db:
+        condition: service_healthy
+    env_file: ./geoshop-back/geoshop-back.env
+    command: >
+      bash -c "
+      python3 manage.py migrate &&
+      python3 manage.py fixturize &&
+      python3 manage.py seed"
+
+  geoshop-front:
+    build: ./geoshop-front
+    depends_on:
+      geoshop-back:
+        condition: service_healthy
+    ports:
+      - 8080:8080
+    healthcheck:
+      test: curl -L --fail http://localhost:8080/ || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 15
+
   extract:
     build: ./extract
     depends_on:
-      pgsql:
-        condition: service_healthy
-      geodata:
+      extract-db:
         condition: service_healthy
     environment:
       - JAVA_OPTS=-Xms1G -Xmx2G
@@ -46,204 +63,41 @@ services:
       - ENCRYPTION_SECRET=12345678901234567890123456789012
       - ENCRYPTION_SALT=12345678901234567890123456789012
       - EXTERNAL_URL=http://localhost:8080/extract/
+      - GEODATA_POSTGRES_HOST=extract-db
+    ports:
+      - 8081:8080
     healthcheck:
       test: curl -L --fail http://localhost:8080/extract || exit 1
       interval: 10s
       timeout: 10s
       retries: 15
 
-  # Extract/Postgres
-  pgsql:
+  # Extract/Postgis
+  extract-db:
     image: postgis/postgis:14-3.2-alpine
     environment:
       - POSTGRES_DB=extract
       - POSTGRES_USER=extractuser
       - POSTGRES_PASSWORD=demopassword
+      - GEOSHOP_BACKEND=http://geoshop-back:8000
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U extractuser -d postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
 
-  # Extract/Postgis
-  geodata:
+  extract-db-update:
+    profiles: [dbupdate]
     image: postgis/postgis:14-3.2-alpine
     environment:
-      - POSTGRES_DB=geodata
+      - POSTGRES_HOST=extract-db
+      - POSTGRES_DB=extract
       - POSTGRES_USER=extractuser
-      - POSTGRES_PASSWORD=demopassword
-    ports:
-      - "54320:5432"
-    volumes:
-      - ./extract/geodata:/docker-entrypoint-initdb.d/
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U extractuser -d postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  # Extract/Updatedb
-  updatedb:
-    image: postgis/postgis:14-3.2-alpine
-    depends_on:
-      extract:
-        condition: service_healthy
-    environment:
-      - PGHOST=pgsql
-      - PGDB=extract
-      - PGUSER=extractuser
       - PGPASSWORD=demopassword
-      - GEOSHOP_BACKEND=http://geoshop:8000
+      - GEOSHOP_BACKEND=http://geoshop-back:8000
+    depends_on:
+      extract-db:
+        condition: service_healthy
     volumes:
-      - ./updatedb:/updatedb
+      - ./extract/db:/updatedb
     entrypoint: /updatedb/update.sh
-
-  # Geoshop
-  geoshop:
-    build: ./geoshop/back
-    depends_on:
-      postgis:
-        condition: service_healthy
-    env_file: ./geoshop/${TEST_MODE+test}.env
-    volumes:
-      - geoshop-files:/geoshop/files
-      - zitadel-files:/zitadel-files
-    healthcheck:
-      test: curl -L --fail http://localhost:8000 || exit 1
-      interval: 10s
-      timeout: 10s
-      retries: 15
-
-  # Geoshop Front End
-  # TODO: use env variables for the backend url and port
-  geoshop_fe:
-    build: ./geoshop/front
-    depends_on:
-      geoshop:
-        condition: service_healthy
-    healthcheck:
-      test: curl -L --fail http://geoshop_fe/ || exit 1
-      interval: 10s
-      timeout: 10s
-      retries: 15
-
-  # Geoshop/Postgis
-  postgis:
-    image: postgis/postgis:14-3.2-alpine
-    volumes:
-      - ./geoshop/resources/ini-scripts:/docker-entrypoint-initdb.d/:ro
-      - ./geoshop/resources/postgis_data:/var/lib/postgresql/data:rw
-    environment:
-      LANG: "en_US.utf8"
-      LC_COLLATE: "en_US.utf8"
-      LC_CTYPE: "en_US.utf8"
-    env_file: ./geoshop/.env
-    ports:
-      - 5432:5432
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U geoshop"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  # Mailhog
-  mailhog:
-    image: mailhog/mailhog
-    tty: true
-    ports:
-      - "1025:1025"
-      - "8025:8025"
-    volumes:
-      - ./mailhog:/home/mailhog/conf
-    entrypoint: MailHog -auth-file=/home/mailhog/conf/auth-users
-
-  # LDAP
-  openldap:
-    image: osixia/openldap:1.5.0
-    environment:
-      - LDAP_ORGANISATION=Extract
-      - LDAP_DOMAIN=extract.org
-      - LDAP_ADMIN_PASSWORD=extract
-      - LDAP_CONFIG_PASSWORD=extract
-      - LDAP_RFC2307BIS_SCHEMA=true
-      - LDAP_REMOVE_CONFIG_AFTER_SETUP=true
-      - LDAP_TLS_VERIFY_CLIENT=try
-    ports:
-      - "389:389"
-      - "636:636"
-
-  ldap-ad:
-    build: ./ldap-ad
-    volumes:
-      - ./ldap-ad/users.ldif:/ldap/users.ldif
-    ports:
-      - "10389:10389"
-
-  # QGIS
-  qgisserver:
-    image: camptocamp/qgis-server
-    volumes:
-      - ./qgis/project:/etc/qgisserver
-    environment:
-      - QGIS_PROJECT_FILE=/etc/qgisserver/world.qgs
-      - QGIS_SERVER_LANDING_PAGE_PROJECTS_DIRECTORIES=/etc/qgisserver
-    networks:
-      - qnetwork
-
-  qgisproxy:
-    depends_on:
-      qgisserver:
-        condition: service_started
-    build:
-      context: ./qgis
-    hostname: qgisproxy
-    container_name: qgisproxy
-    volumes:
-      - ./qgis/nginx.conf:/etc/nginx/nginx/conf:ro
-    ports:
-      - 8888:80
-    networks:
-      - qnetwork
-      - default
-
-  test:
-    profiles: [testing]
-    build: ./tests
-    environment:
-      - GEOSHOP_DEMO_LOGIN=${GEOSHOP_DEMO_LOGIN}
-      - EXTRACT_DEMO_LOGIN=${EXTRACT_DEMO_LOGIN}
-      - ZITADEL_DEMO_LOGIN=${ZITADEL_DEMO_LOGIN}
-      - TEST_OUTPUT=${TEST_OUTPUT:-/test_output/}
-    volumes:
-      - ./test_output:${TEST_OUTPUT:-/test_output/}
-    depends_on:
-      selenium:
-        condition: service_healthy
-      frontend:
-        condition: service_healthy
-      zitadel:
-        condition: service_started
-
-  selenium:
-    profiles: [testing]
-    image: selenium/standalone-firefox
-    ports:
-      - 5900:5900
-    healthcheck:
-      test: curl --fail http://localhost:4444/ || exit 1
-      interval: 10s
-      timeout: 10s
-      retries: 15
-
-  zitadel:
-    build: zitadel
-    volumes:
-      - zitadel-files:/zitadel/files
-    ports:
-      - 9998:9998
-    environment:
-      - PORT=9998
-      - USERS_FILE=/zitadel/users.json
-      - ISSUER=http://zitadel:9998
-      - DEV_MODE=true
-      - REDIRECT_URI=http://frontend/geoshop/oidc/callback,https://frontend:80/geoshop/oidc/callback,http://frontend:80/geoshop/oidc/callback,http://frontend/geoshop/auth/oidc
