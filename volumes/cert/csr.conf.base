@@ -1,0 +1,26 @@
+[req]
+default_bits = 2048
+prompt = no
+default_md = sha256
+req_extensions = req_ext
+distinguished_name = dn
+
+[dn]
+# Enter these options
+C=US
+ST=WA
+L=Seattle
+O=MyCompany
+OU=MyDivision
+emailAddress=mymail@domain.test
+CN=_DOMAIN_
+
+[req_ext]
+subjectAltName=@alt_names
+
+[alt_names]
+# Extra domain names to associate with our cert
+DNS.1 = geoshop-back
+DNS.2 = zitadel
+DNS.3 = 127.0.0.1
+DNS.4 = localhost

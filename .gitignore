@@ -1,1 +1,5 @@
 geoshop/resources/postgis_data/
+volumes/cert/*.key
+volumes/cert/*.csr
+volumes/cert/*.crt
+volumes/geoshop-back
