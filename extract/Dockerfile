@@ -42,7 +42,7 @@ RUN cd /extract-build/extract/ && git checkout "${EXTRACT_VERSION}" && \
     cp -v /extract-build/extract/extract/target/*war /extract-build/extract-${EXTRACT_VERSION}.war
 
 # Extract service
-FROM tomcat:9.0.64-jre17
+FROM tomcat:9-jre17
 LABEL Maintainer="andrey.rusakov@camptocamp.com" Vendor="Camptocamp"
 
 ENV GEODATA_POSTGRES_HOST="${GEODATA_POSTGRES_HOST:-pgsql}" \
@@ -61,7 +61,9 @@ RUN apt update && apt upgrade -y && \
 COPY --from=builder /extract-build/extract-*.war /usr/local/tomcat/webapps/extract.war
 COPY tomcat/conf/context.xml /usr/local/tomcat/conf/context.xml
 COPY script.py /extract/script.py
+COPY entrypoint.sh /extract/entrypoint.sh
 
 RUN mkdir -p /var/log/extract
 RUN chown -R www-data:www-data /usr/local/tomcat/ /var/log/extract/ /var/extract/orders /extract/
 
+ENTRYPOINT [ "/bin/bash",  "/extract/entrypoint.sh" ]
