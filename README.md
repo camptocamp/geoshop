@@ -27,6 +27,12 @@ truststore.inject_into_ssl()
 # ...All other code...
 ```
 
+Java-based services (extract in our case) also require a special command to import the certs:
+```bash
+keytool -import -trustcacerts -keystore /opt/java/openjdk/lib/security/cacerts -storepass changeit -noprompt -alias geoshop-back -file /cert/geoshop-back.crt
+keytool -import -trustcacerts -keystore /opt/java/openjdk/lib/security/cacerts -storepass changeit -noprompt -alias geoshop-front -file /cert/geoshop-back.crt
+```
+
 To generate new certificates, go to the ```volumes/cert``` and run ```bash gencert.sh <domain>```.  Certificates are used only for tests and there is no need to worry about exposing them.
 
 ### How to run (cold start)
