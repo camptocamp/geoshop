@@ -1,4 +1,6 @@
 services:
+
+  # Geoshop
   geoshop-back:
     build: ./geoshop-back
     depends_on:
@@ -6,10 +8,17 @@ services:
         condition: service_healthy
       geoshop-back-db-migrate:
         condition: service_completed_successfully
-    env_file: ./geoshop-back/geoshop-back.env
-    command: gunicorn wsgi -b :8000 --timeout 90
-    ports:
-      - 8000:8000
+      zitadel:
+        condition: service_started
+    env_file: ./geoshop-back.env
+    command: >
+      bash -c "
+      update-ca-certificates &&
+      gunicorn wsgi -b :8000 --timeout 90"
+    volumes:
+      - ./volumes/geoshop-back/keys:/keys
+      - ./volumes/cert:/usr/local/share/ca-certificates/geoshop
+      - ./volumes/cert:/cert
     healthcheck:
       test: curl -L --fail http://localhost:8000 || exit 1
       interval: 10s
@@ -18,9 +27,9 @@ services:
 
   geoshop-back-db:
     image: postgis/postgis:14-3.2-alpine
-    env_file: ./geoshop-back/geoshop-back.env
+    env_file: ./geoshop-back.env
     volumes:
-      - "./geoshop-back/db:/docker-entrypoint-initdb.d:ro"
+      - ./volumes/geoshop-back/postgres-data:/var/lib/postgresql/data
     healthcheck:
       test: pg_isready -h 127.0.0.1 -U geoshop -d geoshop
       interval: 5s
@@ -32,9 +41,14 @@ services:
     depends_on:
       geoshop-back-db:
         condition: service_healthy
-    env_file: ./geoshop-back/geoshop-back.env
+      zitadel:
+        condition: service_started
+    env_file: ./geoshop-back.env
+    volumes:
+      - ./volumes/cert:/usr/local/share/ca-certificates/geoshop
     command: >
       bash -c "
+      update-ca-certificates &&
       python3 manage.py migrate &&
       python3 manage.py fixturize &&
       python3 manage.py seed"
@@ -44,18 +58,22 @@ services:
     depends_on:
       geoshop-back:
         condition: service_healthy
-    ports:
-      - 8080:8080
+    volumes:
+      - ./volumes/cert:/usr/local/share/ca-certificates/geoshop
+      - ./volumes/cert:/cert
     healthcheck:
-      test: curl -L --fail http://localhost:8080/ || exit 1
+      test: curl -L --fail https://localhost/ || exit 1
       interval: 10s
       timeout: 10s
       retries: 15
 
+  # Extract
   extract:
     build: ./extract
     depends_on:
       extract-db:
+        condition: service_healthy
+      geoshop-back:
         condition: service_healthy
     environment:
       - JAVA_OPTS=-Xms1G -Xmx2G
@@ -64,8 +82,9 @@ services:
       - ENCRYPTION_SALT=12345678901234567890123456789012
       - EXTERNAL_URL=http://localhost:8080/extract/
       - GEODATA_POSTGRES_HOST=extract-db
-    ports:
-      - 8081:8080
+    volumes:
+      - ./volumes/cert:/usr/local/share/ca-certificates/geoshop
+      - ./volumes/cert:/cert
     healthcheck:
       test: curl -L --fail http://localhost:8080/extract || exit 1
       interval: 10s
@@ -80,6 +99,9 @@ services:
       - POSTGRES_USER=extractuser
       - POSTGRES_PASSWORD=demopassword
       - GEOSHOP_BACKEND=http://geoshop-back:8000
+    volumes:
+      - ./volumes/extract/postgres-data:/var/lib/postgresql/data
+      - ./volumes/cert/geoshop-ca.crt:/usr/local/share/ca-certificates/geoshop-ca.crt
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U extractuser -d postgres"]
       interval: 5s
@@ -101,3 +123,69 @@ services:
     volumes:
       - ./extract/db:/updatedb
     entrypoint: /updatedb/update.sh
+
+  selenium:
+    image: selenium/standalone-firefox
+    ports:
+      - 5900:5900
+    volumes:
+      - ./volumes/cert/:/usr/local/share/ca-certificates/geoshop
+      - ./volumes/cert:/cert
+    healthcheck:
+      test: curl --fail http://localhost:4444/ || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 15
+
+  # Zitadel
+  # Default user:
+  #   name: zitadel-admin@zitadel.zitadel
+  #   password: Password1!
+  #   current password: F,umP&@%mh&Ai4L
+  zitadel:
+    restart: 'always'
+    image: 'ghcr.io/zitadel/zitadel:latest'
+    command: 'start-from-setup --init-projections --masterkey "MasterkeyNeedsToHave32Characters" --config /config.yaml --steps /config.yaml'
+    environment:
+      ZITADEL_PORT: 443
+      ZITADEL_EXTERNALPORT: 443
+      ZITADEL_EXTERNALSECURE: true
+      ZITADEL_TLS_ENABLED: true
+      ZITADEL_TLS_CERTPATH: /cert/zitadel.crt
+      ZITADEL_TLS_KEYPATH: /cert/zitadel.key
+
+      # database configuration
+      ZITADEL_DATABASE_POSTGRES_HOST: zitadel-db
+      ZITADEL_DATABASE_POSTGRES_PORT: 5432
+      ZITADEL_DATABASE_POSTGRES_DATABASE: zitadel
+      ZITADEL_DATABASE_POSTGRES_USER_USERNAME: zitadel
+      ZITADEL_DATABASE_POSTGRES_USER_PASSWORD: zitadel
+      ZITADEL_DATABASE_POSTGRES_USER_SSL_MODE: disable
+      ZITADEL_DATABASE_POSTGRES_ADMIN_USERNAME: postgres
+      ZITADEL_DATABASE_POSTGRES_ADMIN_PASSWORD: postgres
+      ZITADEL_DATABASE_POSTGRES_ADMIN_SSL_MODE: disable
+    volumes:
+      - ./zitadel/machinekey:/machinekey
+      - ./zitadel/config.yaml:/config.yaml
+      - ./volumes/cert:/cert
+    ports:
+      - 8443:443
+    depends_on:
+      zitadel-db:
+        condition: 'service_healthy'
+
+  zitadel-db:
+    restart: 'always'
+    image: postgres:17-alpine
+    environment:
+      PGUSER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./volumes/zitadel/postgres-data:/var/lib/postgresql/data
+      - ./volumes/cert:/usr/local/share/ca-certificates/geoshop
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "zitadel", "-U", "postgres"]
+      interval: '10s'
+      timeout: '30s'
+      retries: 5
+      start_period: '20s'
