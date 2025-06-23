@@ -1,4 +1,4 @@
-asit-asso-extract docker package
+Geoshop docker package
 =====
 
 ## Demo and the config for Extract and Geoshop
