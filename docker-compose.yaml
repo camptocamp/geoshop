@@ -156,7 +156,6 @@ services:
   # Default user:
   #   name: zitadel-admin@zitadel.zitadel
   #   password: Password1!
-  #   current password: F,umP&@%mh&Ai4L
   zitadel:
     restart: 'always'
     image: 'ghcr.io/zitadel/zitadel:latest'
