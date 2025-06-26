@@ -53,11 +53,11 @@ ENV GEODATA_POSTGRES_HOST="${GEODATA_POSTGRES_HOST:-pgsql}" \
     EXTERNAL_URL="${EXTERNAL_URL:-http://localhost:8080}"
 
 RUN apt update && apt upgrade -y && \
-    apt install -y curl python3 python3-geopandas python3-psycopg2 && \
+    apt install -y curl python3 python3-geopandas python3-psycopg2 python3-gdal && \
     apt install -y software-properties-common && \
-    add-apt-repository ppa:ubuntugis/ppa && \
     apt update && apt install -y python3-gdal && \
     mkdir -p /var/extract/orders && mkdir -p /extract/
+
 COPY --from=builder /extract-build/extract-*.war /usr/local/tomcat/webapps/extract.war
 COPY tomcat/conf/context.xml /usr/local/tomcat/conf/context.xml
 COPY script.py /extract/script.py
@@ -66,4 +66,5 @@ COPY entrypoint.sh /extract/entrypoint.sh
 RUN mkdir -p /var/log/extract
 RUN chown -R www-data:www-data /usr/local/tomcat/ /var/log/extract/ /var/extract/orders /extract/
 
+USER www-data
 ENTRYPOINT [ "/bin/bash",  "/extract/entrypoint.sh" ]
