@@ -143,6 +143,8 @@ services:
     image: selenium/standalone-firefox
     ports:
       - 5900:5900
+    environment:
+      DISPLAY: :99
     volumes:
       - ./volumes/cert/:/usr/local/share/ca-certificates/geoshop
       - ./volumes/cert:/cert
