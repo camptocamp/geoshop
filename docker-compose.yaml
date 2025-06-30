@@ -1,9 +1,27 @@
 services:
 
+  # Certificate generation
+  certs:
+    image: alpine
+    command: >
+      sh -c "
+        apk add --no-cache openssl;
+        cd /cert
+        for i in geoshop-back geoshop-front extract zitadel
+        do
+          sh gencert.sh $$i
+        done;
+        chmod a=rwx -R /cert # Only for local run!
+      "
+    volumes:
+      - ./volumes/cert:/cert
+
   # Geoshop
   geoshop-back:
     build: ./geoshop-back
     depends_on:
+      certs:
+        condition: service_completed_successfully
       geoshop-back-db:
         condition: service_healthy
       geoshop-back-db-migrate:
@@ -39,6 +57,8 @@ services:
   geoshop-back-db-migrate:
     build: ./geoshop-back
     depends_on:
+      certs:
+        condition: service_completed_successfully
       geoshop-back-db:
         condition: service_healthy
       zitadel:
@@ -56,6 +76,8 @@ services:
   geoshop-front:
     build: ./geoshop-front
     depends_on:
+      certs:
+        condition: service_completed_successfully
       geoshop-back:
         condition: service_healthy
     volumes:
@@ -78,6 +100,8 @@ services:
     depends_on:
       extract-base:
         condition: service_healthy
+      certs:
+        condition: service_completed_successfully
     healthcheck:
       test: curl -L --fail https://extract/extract || exit 1
       interval: 10s
@@ -115,6 +139,9 @@ services:
       - POSTGRES_USER=extractuser
       - POSTGRES_PASSWORD=demopassword
       - GEOSHOP_BACKEND=http://geoshop-back:8000
+    depends_on:
+      certs:
+        condition: service_completed_successfully
     volumes:
       - ./volumes/extract/postgres-data:/var/lib/postgresql/data
       - ./volumes/cert/geoshop-ca.crt:/usr/local/share/ca-certificates/geoshop-ca.crt
@@ -133,6 +160,8 @@ services:
       - PGPASSWORD=demopassword
       - GEOSHOP_BACKEND=http://geoshop-back:8000
     depends_on:
+      certs:
+        condition: service_completed_successfully
       extract-db:
         condition: service_healthy
     volumes:
@@ -145,6 +174,9 @@ services:
       - 5900:5900
     environment:
       DISPLAY: :99
+    depends_on:
+      certs:
+        condition: service_completed_successfully
     volumes:
       - ./volumes/cert/:/usr/local/share/ca-certificates/geoshop
       - ./volumes/cert:/cert
@@ -159,9 +191,8 @@ services:
   #   name: zitadel-admin@zitadel.zitadel
   #   password: Password1!
   zitadel:
-    restart: 'always'
     image: 'ghcr.io/zitadel/zitadel:latest'
-    command: 'start-from-setup --init-projections --masterkey "MasterkeyNeedsToHave32Characters" --config /config.yaml --steps /config.yaml'
+    command: 'start-from-init --init-projections --masterkey "MasterkeyNeedsToHave32Characters" --config /config.yaml --steps /config.yaml'
     environment:
       ZITADEL_PORT: 443
       ZITADEL_EXTERNALPORT: 443
@@ -169,6 +200,7 @@ services:
       ZITADEL_TLS_ENABLED: true
       ZITADEL_TLS_CERTPATH: /cert/zitadel.crt
       ZITADEL_TLS_KEYPATH: /cert/zitadel.key
+      ZITADEL_EXTERNALDOMAIN: zitadel
 
       # database configuration
       ZITADEL_DATABASE_POSTGRES_HOST: zitadel-db
@@ -181,12 +213,15 @@ services:
       ZITADEL_DATABASE_POSTGRES_ADMIN_PASSWORD: postgres
       ZITADEL_DATABASE_POSTGRES_ADMIN_SSL_MODE: disable
     volumes:
-      - ./zitadel/machinekey:/machinekey
+      - ./volumes/zitadel/machinekey:/machinekey
+      - ./volumes/geoshop-back/keys:/geoshop-keys
       - ./zitadel/config.yaml:/config.yaml
       - ./volumes/cert:/cert
     ports:
       - 8443:443
     depends_on:
+      certs:
+        condition: service_completed_successfully
       zitadel-db:
         condition: 'service_healthy'
 
