@@ -35,15 +35,13 @@ keytool -import -trustcacerts -keystore /opt/java/openjdk/lib/security/cacerts -
 
 To generate new certificates, go to the ```volumes/cert``` and run ```bash gencert.sh <domain>```.  Certificates are used only for tests and there is no need to worry about exposing them.
 
-### How to run (cold start)
+### How to run
+```volumes``` folder contains database files and other persistent content, so you can remove it
+for a clean start or get it from somewhere else to check another configuration.
+
 1. ```docker compose up``` to bring the system up
 2. ```vncviewer localhost:5900``` connects to the Selenium instance with browser.
-3. Do the initialization steps and first run steps.
-4. Keep ```volumes``` folder somewhere to avoid lengthy configuration process.
-
-### How to run (hot start)
-1. Get ```volumes``` content from someone
-2. ```docker compose up``` to bring the system up
+3. ```docker compose exec selenium firefox``` to start a new browser instance.
 
 ### How to test
 
