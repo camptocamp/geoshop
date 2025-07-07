@@ -4,6 +4,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: "Geoshop",
   description: "Getting started with Geoshop and Extract",
+  base: "/geoshop/",
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
