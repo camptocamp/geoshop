@@ -1,85 +1,54 @@
-# Markdown Extension Examples
+# Getting Started with Geoshop
+This page will guide you through the process of installing Geoshop locally. To follow these steps, you'll need Docker.
 
-This page demonstrates some of the built-in markdown extensions provided by VitePress.
+## Get the code
 
-## Syntax Highlighting
+Geoshop solution is separated in 3 distincts projects:
 
-VitePress provides Syntax Highlighting powered by [Shiki](https://github.com/shikijs/shiki), with additional features like line-highlighting:
+* The [backend](https://github.com/camptocamp/geoshop-back), a Django Rest Framework based API
+* The [frontend](https://github.com/camptocamp/geoshop-front) based on Angular
+* [Extract](https://github.com/asit-asso/extract), a Java based geodata export orchestrator
 
-**Input**
+Each project is designed to run independently on its own server, but their full potential is realized when they are integrated.
 
-````md
-```js{4}
-export default {
-  data () {
-    return {
-      msg: 'Highlighted!'
-    }
-  }
-}
+For your convenience, we have prepared a GitHub repository that accomplishes exactly that:
+
+```sh
+git clone --recurse-submodules https://github.com/sitn/geoshop-demo.git
+cd geoshop-demo
+cp .env.sample .env
+docker-compose up -d
 ```
-````
+Once everything is set up, your app should be accessible at https://localhost.
 
-**Output**
+If you receive a warning indicating that your connection is not private, simply click the *Advanced* button and proceed.
 
-```js{4}
-export default {
-  data () {
-    return {
-      msg: 'Highlighted!'
-    }
-  }
-}
-```
+## What happened?
+The application is running the local code within containers. To prevent cross-origin issues, a proxy serves both the frontend and backend at https://localhost.
 
-## Custom Containers
-
-**Input**
-
-```md
-::: info
-This is an info box.
-:::
-
-::: tip
-This is a tip.
-:::
-
-::: warning
-This is a warning.
-:::
-
-::: danger
-This is a dangerous warning.
-:::
-
-::: details
-This is a details block.
-:::
+```mermaid
+block-beta
+columns 5
+  space:1
+  proxy("proxy"):3
+  space:6
+  F("front"):2
+  space
+  B("api"):2
+  space:7
+  D("db")
+  space
+  M("migrate")
+  
+  B --> D
+  proxy --> B
+  proxy --> F
+  M --> D
+  style M fill:#bbf,stroke-width:2px,color:#fff,stroke-dasharray: 5 5
 ```
 
-**Output**
+The `migrate` container runs the initial database migrations to set up the database and then shuts down.
 
-::: info
-This is an info box.
-:::
+## What's next?
 
-::: tip
-This is a tip.
-:::
-
-::: warning
-This is a warning.
-:::
-
-::: danger
-This is a dangerous warning.
-:::
-
-::: details
-This is a details block.
-:::
-
-## More
-
-Check out the documentation for the [full list of markdown extensions](https://vitepress.dev/guide/markdown).
+Congratulations! You now have a local instance of Geoportal running. You can proceed to the [tutorial](./tutorial/).
