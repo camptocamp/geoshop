@@ -51,4 +51,4 @@ The `migrate` container runs the initial database migrations to set up the datab
 
 ## What's next?
 
-Congratulations! You now have a local instance of Geoportal running. You can proceed to the [tutorial](./tutorial/).
+Congratulations! You now have a local instance of Geoportal running. You can proceed to the [tutorial](./tutorial/1-publish-product).

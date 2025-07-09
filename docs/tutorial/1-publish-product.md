@@ -2,7 +2,7 @@
 
 In this tutorial, we will publish a product, place an order as a client, and configure Extract to manage data extraction.
 
-If you have followed the [getting started](./getting-started) guide, you should be able to access your API at:
+If you have followed the [getting started](../getting-started) guide, you should be able to access your API at:
 
 https://localhost/api
 
