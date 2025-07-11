@@ -24,8 +24,9 @@ export default withMermaid(defineConfig({
             text: 'Tutorial',
             items: [
               { text: '1 - Publish a product', link: '/tutorial/1-publish-product' },
-              { text: '2 - Users', link: '/tutorial/2-users' },
-              { text: '3 - Orders', link: '/tutorial/3-orders' },
+              { text: '2 - Create an user', link: '/tutorial/2-users' },
+              { text: '3 - Order a product', link: '/tutorial/3-orders' },
+              { text: '4 - Configure Extract', link: '/tutorial/4-extract' },
             ]
           },
           {

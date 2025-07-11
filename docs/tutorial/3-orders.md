@@ -1,4 +1,4 @@
-# Part 2 - Order a product
+# Part 3 - Order a product
 
 At this point in the tutorial, you should have:
  * A validated client account
