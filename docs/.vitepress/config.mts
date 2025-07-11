@@ -31,7 +31,8 @@ export default withMermaid(defineConfig({
           {
             text: 'Documentation',
             items: [
-              { text: 'Metadatas', link: '/documentation/metadata' },
+              { text: 'Metadatas', link: '/documentation/metadatas' },
+              { text: 'Users', link: '/documentation/users' },
             ]
           },
           { text: 'Deploy', link: '/deploy' },

@@ -17,7 +17,7 @@ For your convenience, we have prepared a GitHub repository that accomplishes exa
 git clone --recurse-submodules https://github.com/sitn/geoshop-demo.git
 cd geoshop-demo
 cp .env.sample .env
-docker-compose up -d
+docker compose up -d
 ```
 Once everything is set up, your app should be accessible at https://localhost.
 
