@@ -36,13 +36,13 @@ Click on the <Badge type="tip" text="SAVE" /> button, the metadata is created. [
 ### Create a Product
 
 1. In the left navigation bar, click on the <Badge type="info" text="+ Add" />  link of ***Products***
-2. Clic on the 🔍 next to ***Metadata*** field and select the metadata we just add
+2. Click on the 🔍 next to ***Metadata*** field and select the metadata we just added
 3. ***Label*** it to `Swiss Municipalities`. This will be the visible name on the catalog
 4. Set the ***Product_statu**s* to `Published`
 5. Select the existing ***Provider*** `external_provider`
 6. Add a new pricing by clicking on the <Badge type="info" text="➕" /> icon:
    1. Let's name it `Free`
-   2. Set ***Princing_type*** as `Free`
+   2. Set ***Pricing_type*** as `Free`
    3. Set all prices to `0`
    4. Click <Badge type="tip" text="SAVE" /> button
 7. Scroll down to ***PRODUCT_FORMATS*** section and click on the <Badge type="info" text="➕" /> to add a new one:
