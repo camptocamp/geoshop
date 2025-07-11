@@ -31,7 +31,7 @@ You cannot create a product without *Metadata*. *Metadata* contains all the info
    <span style="color: red;">⚠ THIS DATASET IS ONLY FOR TESTING PURPOSES</span>
    ```
 
-Click on the <Badge type="tip" text="SAVE" /> button, the metadata is created. [Read more on metadatas](../documentation/metadata)
+Click on the <Badge type="tip" text="SAVE" /> button, the metadata is created. [Read more on metadatas](../documentation/metadatas)
 
 ### Create a Product
 
