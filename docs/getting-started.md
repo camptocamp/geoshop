@@ -3,7 +3,7 @@ This page will guide you through the process of installing Geoshop locally. To f
 
 ## Get the code
 
-Geoshop solution is separated in 3 distincts projects:
+Geoshop solution is separated in 3 distinct projects:
 
 * The [backend](https://github.com/camptocamp/geoshop-back), a Django Rest Framework based API
 * The [frontend](https://github.com/camptocamp/geoshop-front) based on Angular
