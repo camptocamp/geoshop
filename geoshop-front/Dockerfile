@@ -6,14 +6,17 @@ WORKDIR /geoshop-front
 COPY config.json config.json
 RUN apt update && apt install -y git && \
     git clone https://github.com/camptocamp/geoshop-front.git src && cd src && \
+    git checkout GEORD-648-bigrefactor && \
     cp /geoshop-front/config.json ./src/assets/configs/ && \
-    npm ci --force && npm run build -- --localize
+    npm i @angular/cli@19.2.15 && \
+    npm ci && npm run build -- --localize
 
 # Serve with nginx unpprevileged
 FROM nginxinc/nginx-unprivileged:stable
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy build artifacts
+
 COPY --from=builder /geoshop-front/src/dist/browser/de /usr/share/nginx/html/de
 COPY --from=builder /geoshop-front/src/dist/browser/en /usr/share/nginx/html/en
 COPY --from=builder /geoshop-front/src/dist/browser/fr /usr/share/nginx/html/fr

@@ -186,6 +186,24 @@ services:
       timeout: 10s
       retries: 15
 
+  test:
+    profiles: [testing]
+    build: ./tests
+    environment:
+      - GEOSHOP_DEMO_LOGIN=${GEOSHOP_DEMO_LOGIN}
+      - EXTRACT_DEMO_LOGIN=${EXTRACT_DEMO_LOGIN}
+      - ZITADEL_DEMO_LOGIN=${ZITADEL_DEMO_LOGIN}
+      - TEST_OUTPUT=${TEST_OUTPUT:-/test_output/}
+    volumes:
+      - ./test_output:${TEST_OUTPUT:-/test_output/}
+    depends_on:
+      selenium:
+        condition: service_healthy
+      geoshop-front:
+        condition: service_healthy
+      zitadel:
+        condition: service_started
+
   # Zitadel
   # Default user:
   #   name: zitadel-admin@zitadel.zitadel
