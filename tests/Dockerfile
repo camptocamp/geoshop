@@ -1,7 +1,7 @@
 FROM python:alpine
 
-RUN apk update --no-cache && \
-    pip install --no-cache-dir selenium
+RUN apk update --no-cache && apk add firefox geckodriver && \
+    pip install --no-cache-dir selenium selenium-firefox
 
-ENTRYPOINT [ "bash", "-c", "python", "/tests/*.py" ]
-
+WORKDIR /tests
+ENTRYPOINT [ "python", "-m", "unittest", "discover", "--pattern=*.py" ]

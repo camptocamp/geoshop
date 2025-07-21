@@ -28,7 +28,7 @@ class GeoshopSmokeTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         logger.info("Starting tests")
-        options = webdriver.FirefoxOptions()
+        options = webdriver.Remote()
         profile = FirefoxProfile()
         profile.set_preference("dom.webnotifications.enabled", False)
         profile.set_preference("app.update.silent", True)

@@ -28,7 +28,7 @@ services:
         condition: service_completed_successfully
       zitadel:
         condition: service_started
-    env_file: ./geoshop-back.env
+    env_file: ./geoshop-back/geoshop-back.env
     command: >
       bash -c "
       update-ca-certificates &&
@@ -45,7 +45,7 @@ services:
 
   geoshop-back-db:
     image: postgis/postgis:14-3.2-alpine
-    env_file: ./geoshop-back.env
+    env_file: ./geoshop-back/geoshop-back.env
     volumes:
       - ./volumes/geoshop-back/postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -63,7 +63,7 @@ services:
         condition: service_healthy
       zitadel:
         condition: service_started
-    env_file: ./geoshop-back.env
+    env_file: ./geoshop-back/geoshop-back.env
     volumes:
       - ./volumes/cert:/usr/local/share/ca-certificates/geoshop
     command: >
@@ -80,11 +80,13 @@ services:
         condition: service_completed_successfully
       geoshop-back:
         condition: service_healthy
+    environment:
+      - CURL_CA_BUNDLE=/cert/geoshop-ca.crt
     volumes:
       - ./volumes/cert:/usr/local/share/ca-certificates/geoshop
       - ./volumes/cert:/cert
     healthcheck:
-      test: curl -L --fail https://localhost/ || exit 1
+      test: curl -L --fail https://geoshop-front/ || exit 1
       interval: 10s
       timeout: 10s
       retries: 15
@@ -186,16 +188,18 @@ services:
       timeout: 10s
       retries: 15
 
-  test:
-    profiles: [testing]
+  tests:
     build: ./tests
+    env_file: ./common.env
     environment:
+      - GEOSHOP_FRONT=https://geoshop-front
+      - GEOSHOP_BACK=http://geoshop-back:8000
       - GEOSHOP_DEMO_LOGIN=${GEOSHOP_DEMO_LOGIN}
-      - EXTRACT_DEMO_LOGIN=${EXTRACT_DEMO_LOGIN}
       - ZITADEL_DEMO_LOGIN=${ZITADEL_DEMO_LOGIN}
       - TEST_OUTPUT=${TEST_OUTPUT:-/test_output/}
     volumes:
       - ./test_output:${TEST_OUTPUT:-/test_output/}
+      - ./tests:/tests
     depends_on:
       selenium:
         condition: service_healthy
