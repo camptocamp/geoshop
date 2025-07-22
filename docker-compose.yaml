@@ -66,6 +66,7 @@ services:
     env_file: ./geoshop-back/geoshop-back.env
     volumes:
       - ./volumes/cert:/usr/local/share/ca-certificates/geoshop
+      - ./volumes/cert:/cert
     command: >
       bash -c "
       update-ca-certificates &&
@@ -100,10 +101,10 @@ services:
       - ./volumes/cert:/usr/local/share/ca-certificates/geoshop
       - ./volumes/cert:/cert
     depends_on:
-      extract-base:
-        condition: service_healthy
       certs:
         condition: service_completed_successfully
+      extract-base:
+        condition: service_healthy
     healthcheck:
       test: curl -L --fail https://extract/extract || exit 1
       interval: 10s
@@ -113,6 +114,8 @@ services:
   extract-base:
     build: ./extract
     depends_on:
+      certs:
+        condition: service_completed_successfully
       extract-db:
         condition: service_healthy
       geoshop-back:
@@ -188,29 +191,9 @@ services:
       timeout: 10s
       retries: 15
 
-  tests:
-    build: ./tests
-    env_file: ./common.env
-    environment:
-      - GEOSHOP_FRONT=https://geoshop-front
-      - GEOSHOP_BACK=http://geoshop-back:8000
-      - GEOSHOP_DEMO_LOGIN=${GEOSHOP_DEMO_LOGIN}
-      - ZITADEL_DEMO_LOGIN=${ZITADEL_DEMO_LOGIN}
-      - TEST_OUTPUT=${TEST_OUTPUT:-/test_output/}
-    volumes:
-      - ./test_output:${TEST_OUTPUT:-/test_output/}
-      - ./tests:/tests
-    depends_on:
-      selenium:
-        condition: service_healthy
-      geoshop-front:
-        condition: service_healthy
-      zitadel:
-        condition: service_started
-
   # Zitadel
   # Default user:
-  #   name: zitadel-admin@zitadel.zitadel
+  #   name: zitadel-admin@zitadel.localhost
   #   password: Password1!
   zitadel:
     image: 'ghcr.io/zitadel/zitadel:latest'
@@ -262,3 +245,24 @@ services:
       timeout: '30s'
       retries: 5
       start_period: '20s'
+
+  tests:
+    profiles:
+      - testing
+    build: ./tests
+    env_file: ./common.env
+    environment:
+      - GEOSHOP_FRONT=https://geoshop-front
+      - GEOSHOP_BACK=https://geoshop-front/api
+      - TEST_OUTPUT=${TEST_OUTPUT:-/test_output/}
+      - SELENIUM_HOST=http://selenium:4444
+    volumes:
+      - ./test_output:${TEST_OUTPUT:-/test_output/}
+      - ./tests:/tests
+    depends_on:
+      selenium:
+        condition: service_healthy
+      geoshop-front:
+        condition: service_healthy
+      zitadel:
+        condition: service_started

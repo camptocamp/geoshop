@@ -3,7 +3,9 @@ domain=$@
 
 if [ ! -f $caname.key ]
 then
-  openssl req  -nodes -new -x509  -keyout $caname.key -out $caname.crt -subj '/CN=GeoshopDemo Root CA/C=AT/ST=Zurich/L=Zurich/O=Geoshop'
+  openssl genrsa -out $caname.key 2048
+  openssl req -nodes -new -x509 -key $caname.key -out $caname.crt \
+  -subj '/CN=GeoshopDemo Root CA/C=AT/ST=Zurich/L=Zurich/O=Geoshop'
 fi
 
 rm -rf $domain.crt $domain.key $domain.csr

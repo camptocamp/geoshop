@@ -17,6 +17,7 @@ CN=_DOMAIN_
 
 [req_ext]
 subjectAltName=@alt_names
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
 
 [alt_names]
 # Extra domain names to associate with our cert
