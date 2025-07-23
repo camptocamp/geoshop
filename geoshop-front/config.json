@@ -115,7 +115,7 @@
     "authority": "https://zitadel",
     "redirectUrl": "https://geoshop-front/de",
     "postLogoutRedirectUri": "https://geoshop-front/de",
-    "clientId": "326790230029959172",
+    "clientId": "330121593160204290",
     "scope": "openid profile email address phone",
     "responseType": "code",
     "silentRenew": true,

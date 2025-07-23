@@ -15,6 +15,18 @@ services:
       "
     volumes:
       - ./volumes/cert:/cert
+      - ./volumes/geoshop-back/keys:/keys
+
+  setup:
+    build: ./setup
+    depends_on:
+      certs:
+        condition: service_completed_successfully
+    volumes:
+      - ./setup:/setup
+      - ./volumes/cert:/cert
+      - ./volumes/geoshop-back/keys:/keys
+    entrypoint: ["python", "/setup/zitadel-setup.py"]
 
   # Geoshop
   geoshop-back:
@@ -183,6 +195,7 @@ services:
       certs:
         condition: service_completed_successfully
     volumes:
+      - ./volumes/geoshop-back/keys:/keys
       - ./volumes/cert/:/usr/local/share/ca-certificates/geoshop
       - ./volumes/cert:/cert
     healthcheck:
