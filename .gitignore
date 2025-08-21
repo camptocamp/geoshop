@@ -1,5 +1,3 @@
 geoshop/resources/postgis_data/
 volumes/cert/
-volumes/cert/
-volumes/cert/
 volumes/geoshop-back
