@@ -4,9 +4,10 @@ LABEL org.opencontainers.image.authors="andrey.rusakov@camptocamp.com"
 WORKDIR /geoshop-front
 
 COPY config.json config.json
-RUN apt update && apt install -y git && \
+RUN apt update && apt install -y git nodejs && \
     git clone https://github.com/camptocamp/geoshop-front.git src && cd src && \
     cp /geoshop-front/config.json ./src/assets/configs/ && \
+    npm i @angular/cli@19.2.15 && \
     npm ci --force && npm run build -- --localize
 
 # Serve with nginx unpprevileged
