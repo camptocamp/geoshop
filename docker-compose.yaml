@@ -231,7 +231,8 @@ services:
       timeout: 10s
       retries: 15
 
-  # Admin password is "Aa!1Aa!1""
+  # Admin password is "QrF^x5\SQrF^x5\S"
+  # external_provider password: QrF^x5\S
   extract:
     image: nginx
     volumes:
