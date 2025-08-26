@@ -8,6 +8,12 @@ This repository contains a working example of the
 [backend](https://github.com/camptocamp/geoshop-back/) and [frontend](https://github.com/camptocamp/geoshop-front/)) and
 using [Zitadel](https://github.com/zitadel) as an authentication service.
 
+### Fast setup
+1. Take volumes folder contents (e.g. as volumes.zip) from someone and unpack it.
+2. Run "docker compose up -d"
+3. ```docker compose exec -d selenium firefox``` to start firefox in the Selenium container
+4. ```vncviewer localhost:5900```, password is ```secret``` to enter a session
+
 ### Structure
 The system is operated through a remote desktop (VNC) connection to the node which is also used for
 an automated testing. Such a solution was made to reduce configuration complexity and having same
@@ -35,7 +41,7 @@ keytool -import -trustcacerts -keystore /cert/extract/cacerts -storepass changei
 
 To generate new certificates, go to the ```volumes/cert``` and run ```bash gencert.sh <domain>```.  Certificates are used only for tests and there is no need to worry about exposing them.
 
-### Initial setup
+### Detailed setup
 ```volumes``` folder contains database files and other persistent content, so you can remove it
 for a clean start or get it from somewhere else to check another configuration.
 
