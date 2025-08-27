@@ -294,6 +294,7 @@ services:
 
   setup:
     build: ./setup
+    profiles: ["setup", "testing"]
     depends_on:
       certs:
         condition: service_completed_successfully
