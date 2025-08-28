@@ -86,7 +86,7 @@ services:
   # Geoshop
   geoshop-back-db:
     image: postgis/postgis:14-3.2-alpine
-    env_file: ./geoshop-back/geoshop-back.env
+    env_file: ./volumes/geoshop-back/geoshop-back.env
     volumes:
       - ./volumes/geoshop-back/postgres-data:/var/lib/postgresql/data
     depends_on:
@@ -109,7 +109,7 @@ services:
         condition: service_healthy
       zitadel:
         condition: service_healthy
-    env_file: ./geoshop-back/geoshop-back.env
+    env_file: ./volumes/geoshop-back/geoshop-back.env
     volumes:
       - ./volumes/cert:/usr/local/share/ca-certificates/geoshop
       - ./volumes/cert:/cert
@@ -131,7 +131,7 @@ services:
         condition: service_healthy
       zitadel:
         condition: service_healthy
-    env_file: ./geoshop-back/geoshop-back.env
+    env_file: ./volumes/geoshop-back/geoshop-back.env
     command: >
       bash -c "
       update-ca-certificates &&
@@ -312,4 +312,4 @@ services:
       - ./setup:/setup
       - ./volumes/cert:/cert
       - ./volumes/geoshop-back/keys:/keys
-    entrypoint: ["sh", "-x", "/setup/setup.sh"]
+    entrypoint: ["python", "/setup/zitadel-setup.py"]

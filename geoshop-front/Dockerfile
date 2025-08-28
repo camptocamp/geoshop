@@ -13,7 +13,6 @@ FROM nginxinc/nginx-unprivileged:stable
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy build artifacts
-
 COPY --from=builder /geoshop-front/src/dist/browser/de /usr/share/nginx/html/de
 COPY --from=builder /geoshop-front/src/dist/browser/en /usr/share/nginx/html/en
 COPY --from=builder /geoshop-front/src/dist/browser/fr /usr/share/nginx/html/fr

@@ -32,8 +32,12 @@ driver = webdriver.Remote(command_executor=SELENIUM_HOST, options=options)
 driver.implicitly_wait(5)
 driver.get(ZITADEL_HOST)
 
-def click(selector):
-    driver.find_element(By.CSS_SELECTOR, selector).click()
+def click(selector, allowNotFound=False):
+    try:
+        driver.find_element(By.CSS_SELECTOR, selector).click()
+    except NoSuchElementException as e:
+        if not allowNotFound:
+           raise e
 
 def keys(selector, text):
     driver.find_element(By.CSS_SELECTOR, selector).send_keys(text)
@@ -49,7 +53,7 @@ keys("#loginName", "zitadel-admin@zitadel.zitadel")
 click("#submit-button")
 keys("#password", "Password1!")
 click("#submit-button")
-click("button[name='skip']")
+click("button[name='skip']", allowNotFound=True)
 keys("#change-old-password", "Password1!")
 keys("#change-new-password", "Aa!1Aa!1")
 keys("#change-password-confirmation", "Aa!1Aa!1")
