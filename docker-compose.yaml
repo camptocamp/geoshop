@@ -111,11 +111,11 @@ services:
         condition: service_healthy
     env_file: ./volumes/geoshop-back/geoshop-back.env
     volumes:
-      - ./volumes/cert:/usr/local/share/ca-certificates/geoshop
+      - ./volumes/cert:/usr/local/share/ca-certificates
       - ./volumes/cert:/cert
     command: >
       bash -c "
-      update-ca-certificates &&
+      update-ca-certificates;
       python3 manage.py migrate &&
       python3 manage.py fixturize &&
       python3 manage.py seed"
