@@ -9,6 +9,14 @@ This repository contains a working example of the
 using [Zitadel](https://github.com/zitadel) as an authentication service.
 
 ### Fast setup
+Service               |Username                     |Password
+----------------------|-----------------------------|----------
+zitadel (unconfigured)|zitadel-admin@zitadel.zitadel|Password1!
+zitadel               |zitadel-admin@zitadel.zitadel|Aa!1Aa!1
+geoshop-front         |zitadel-admin@zitadel.zitadel|Aa!1Aa!1
+geoshop-back (admin)  |admin                        |Test1234
+extract               |admin                        |Aa!1Aa!1Aa!1Aa!1Aa!1Aa!1
+
 1. Take volumes folder contents (e.g. as volumes.zip) from someone and unpack it.
 2. Run "docker compose up -d"
 3. ```docker compose exec -d selenium firefox``` to start firefox in the Selenium container
