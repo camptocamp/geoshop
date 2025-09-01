@@ -231,8 +231,6 @@ services:
       timeout: 10s
       retries: 15
 
-  # Admin password is "QrF^x5\SQrF^x5\S"
-  # external_provider password: QrF^x5\S
   extract:
     image: nginx
     volumes:
@@ -265,6 +263,7 @@ services:
       - ./volumes/geoshop-back/keys:/keys
       - ./volumes/cert/:/usr/local/share/ca-certificates/geoshop
       - ./volumes/cert:/cert
+      - ./volumes/selenium/firefox:/home/seluser/.mozilla/firefox
     healthcheck:
       test: curl --fail http://localhost:4444/ || exit 1
       interval: 10s

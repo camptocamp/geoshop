@@ -3,4 +3,4 @@ volumes/cert/*.key
 volumes/cert/*.csr
 volumes/cert/*.crt
 volumes/geoshop-back/keys
-volumes/geoshop-back/postres-data
+volumes/geoshop-back/postgres-data

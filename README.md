@@ -15,6 +15,8 @@ zitadel (unconfigured)|zitadel-admin@zitadel.zitadel|Password1!
 zitadel               |zitadel-admin@zitadel.zitadel|Aa!1Aa!1
 geoshop-front         |zitadel-admin@zitadel.zitadel|Aa!1Aa!1
 geoshop-back (admin)  |admin                        |Test1234
+geoshop-back, extract |extract                      |Aa!1Aa!1Aa!1Aa!1Aa!1Aa!1
+geoshop-back, extract |external-provider            |Aa!1Aa!1Aa!1Aa!1Aa!1Aa!1
 extract               |admin                        |Aa!1Aa!1Aa!1Aa!1Aa!1Aa!1
 
 1. Take volumes folder contents (e.g. as volumes.zip) from someone and unpack it.
