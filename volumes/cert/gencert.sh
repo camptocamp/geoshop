@@ -4,13 +4,13 @@ domain=$@
 
 if [ ! -f $caname.key ]
 then
-  openssl genrsa -days $expdays -out $caname.key 2048
+  openssl genrsa -out $caname.key 2048
   openssl req -days $expdays -nodes -new -x509 -key $caname.key -out $caname.crt \
   -subj '/CN=GeoshopDemo Root CA/C=AT/ST=Zurich/L=Zurich/O=Geoshop'
 fi
 
 echo "Generating key"
-openssl genrsa -days $expdays -out $domain.key 2048
+openssl genrsa -out $domain.key 2048
 
 cat csr.conf.base | sed "s/_DOMAIN_/$domain/g" > csr.conf
 echo "Generating sign request"
