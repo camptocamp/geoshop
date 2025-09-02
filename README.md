@@ -23,6 +23,7 @@ extract               |admin                        |Aa!1Aa!1Aa!1Aa!1Aa!1Aa!1
 2. Run "docker compose up -d"
 3. ```docker compose exec -d selenium firefox``` to start firefox in the Selenium container
 4. ```vncviewer localhost:5900```, password is ```secret``` to enter a session
+5. Go to https://zitadel, https://extract/extract and allow to use the self signed certificates.
 
 ### Structure
 The system is operated through a remote desktop (VNC) connection to the node which is also used for
