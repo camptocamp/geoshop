@@ -12,17 +12,17 @@ services:
         for i in geoshop-back geoshop-front extract zitadel; do
             if [ ! -f  $$i.crt ]; then
                 sh gencert.sh $$i
-            elif
-                echo "Keys already exist: $$i"
+            else
+                echo \"Keys already exist: $$i\"
             fi
-        done;
+        done
 
         # Creating bundles
         for i in *key; do
             if [ ! -f $${i::-4}.p12 ]; then
                 openssl pkcs12 -export -out $${i::-4}.p12 -inkey $$i -in $${i::-4}.crt -passout pass:
-            elif
-                echo "Keystore already exists: $$i"
+            else
+                echo \"Keystore already exists: $$i\"
             fi
         done
         chmod a=rwx -R /cert # Only for local run!
