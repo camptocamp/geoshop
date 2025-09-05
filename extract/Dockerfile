@@ -11,7 +11,7 @@ RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y git openjdk-21-jdk maven npm && \
     npm install -g corepack && \
-    git clone https://github.com/asit-asso/extract && \
+    git clone https://github.com/camptocamp/extract && \
     git clone https://github.com/sitn/sitn_geoshop_connector
 
 COPY extract-task-exec /extract-build/extract-task-exec
