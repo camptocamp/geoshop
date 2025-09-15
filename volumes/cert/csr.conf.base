@@ -17,10 +17,11 @@ CN=_DOMAIN_
 
 [req_ext]
 subjectAltName=@alt_names
+keyUsage=digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment,keyCertSign
 
 [alt_names]
 # Extra domain names to associate with our cert
-DNS.1 = geoshop-back
-DNS.2 = zitadel
-DNS.3 = 127.0.0.1
-DNS.4 = localhost
+DNS.1=geoshop-back
+DNS.2=zitadel
+DNS.3=geoshop-front
+DNS.4=localhost

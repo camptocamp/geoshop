@@ -16,6 +16,8 @@ RUN cp .env.sample .env && update-ca-certificates && python -m pip install trust
     mv -vn default_settings.py settings.py && \
     sed -i 's/import sys/import sys\nimport truststore\ntruststore.inject_into_ssl()\n/g' manage.py && \
     sed -i 's/import os/import os\nimport truststore\ntruststore.inject_into_ssl()\n/g' settings.py && \
+    sed -i 's/requests.get(discovery_url)/requests.get(discovery_url, verify=False)/g' settings.py && \
+    sed -i 's/settings.OIDC_INTROSPECT_URL,/settings.OIDC_INTROSPECT_URL, verify=False,/g' oidc.py && \
     python manage.py collectstatic --noinput
 
 # Compile locales

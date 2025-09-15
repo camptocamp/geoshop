@@ -3,11 +3,10 @@ FROM node:22.6.0-slim AS builder
 LABEL org.opencontainers.image.authors="andrey.rusakov@camptocamp.com"
 WORKDIR /geoshop-front
 
-COPY config.json config.json
 RUN apt update && apt install -y git && \
     git clone https://github.com/camptocamp/geoshop-front.git src && cd src && \
-    cp /geoshop-front/config.json ./src/assets/configs/ && \
-    npm ci --force && npm run build -- --localize
+    npm i @angular/cli@19.2.15 && \
+    npm ci && npm run build -- --localize
 
 # Serve with nginx unpprevileged
 FROM nginxinc/nginx-unprivileged:stable

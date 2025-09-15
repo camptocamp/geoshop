@@ -2,13 +2,13 @@
   "apiUrl": "https://geoshop-front/api",
   "mediaUrl": "https://geoshop-front/api",
   "baseMapUrl": "https://wmts.geo.admin.ch/1.0.0/{layer}/{style}/current/{TileMatrixSet}/{TileMatrix}/{TileCol}/{TileRow}",
-  "searchf": {
+  "search": {
     "url": "https://ugsp-geoportal-test.camptocamp.com/search",
     "queryParamName": "query",
     "querySuffix": "limit=30&partitionlimit=5&interface=desktop&lang=en",
     "providerType": "mapfish"
   },
-  "search": {
+  "searchf": {
     "url": "https://api3.geo.admin.ch/rest/services/api/SearchServer",
     "queryParamName": "searchText",
     "querySuffix": "limit=5&geometryFormat=geojson&type=locations&sr=2056&origins=district,gg25,parcel,address",
@@ -115,7 +115,7 @@
     "authority": "https://zitadel",
     "redirectUrl": "https://geoshop-front/de",
     "postLogoutRedirectUri": "https://geoshop-front/de",
-    "clientId": "326790230029959172",
+    "clientId": "335350599207878661",
     "scope": "openid profile email address phone",
     "responseType": "code",
     "silentRenew": true,
