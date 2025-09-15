@@ -60,6 +60,7 @@ RUN apt update && apt upgrade -y && \
 COPY --from=builder /extract-build/extract-*.war /usr/local/tomcat/webapps/extract.war
 COPY tomcat/conf/context.xml /usr/local/tomcat/conf/context.xml
 COPY script.py /extract/script.py
+COPY echo.py /extract/echo.py
 COPY entrypoint.sh /extract/entrypoint.sh
 
 RUN mkdir -p /var/log/extract
