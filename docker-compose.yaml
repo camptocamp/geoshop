@@ -236,6 +236,7 @@ services:
       - ENCRYPTION_SALT=12345678901234567890123456789012
       - EXTERNAL_URL=https://extract
       - GEODATA_POSTGRES_HOST=extract-db
+      - EXTRACT_I18N_LANGUAGE=de
     volumes:
       - ./volumes/cert:/cert
       - ./volumes/cert/:/usr/local/share/ca-certificates/

@@ -1,5 +1,5 @@
 # Extract builder
-FROM ubuntu:oracular AS builder
+FROM ubuntu:noble AS builder
 LABEL Maintainer="andrey.rusakov@camptocamp.com" Vendor="Camptocamp"
 
 WORKDIR /extract-build
