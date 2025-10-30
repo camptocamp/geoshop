@@ -86,4 +86,3 @@ worry about exposing them.
 * [Extract](https://github.com/asit-asso/extract)
 * [Geoshop Extract connector](https://github.com/sitn/sitn_geoshop_connector)
 * [Geoshop backend](https://github.com/camptocamp/geoshop-back/)
-
