@@ -123,6 +123,7 @@ public class ExecRequest implements ITaskProcessorRequest {
      */
     private Calendar endDate;
 
+    private String surface;
 
 
     @Override
@@ -462,4 +463,13 @@ public class ExecRequest implements ITaskProcessorRequest {
         this.organismGuid = guid;
     }
 
+    /**
+     * Obtains the size of the ordered data area.
+     *
+     * @return the area in square meters
+     */
+    @Override
+    public String getSurface() {
+        return this.surface;
+    }
 }
