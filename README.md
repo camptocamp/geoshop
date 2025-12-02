@@ -87,4 +87,3 @@ worry about exposing them.
 * [Geoshop Extract connector](https://github.com/sitn/sitn_geoshop_connector)
 * [Geoshop backend](https://github.com/camptocamp/geoshop-back/)
 
-
