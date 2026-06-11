@@ -11,22 +11,17 @@ RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y git openjdk-21-jdk maven npm && \
     npm install -g corepack && \
-    git clone https://github.com/camptocamp/extract && \
-    git clone https://github.com/sitn/sitn_geoshop_connector
+    git clone --recursive https://github.com/camptocamp/extract
 
 COPY extract-task-exec /extract-build/extract-task-exec
 
 # Copy custom application.properties file to the build folder
 COPY config/application.properties /extract-build/application.properties
 
-RUN cd /extract-build/sitn_geoshop_connector/ && git checkout "${GEOSHOP_CONNECTOR_VERSION}" && \
-    cd /extract-build/sitn_geoshop_connector/plugin-interface && \
-    mvn clean install && \
-    cd /extract-build/sitn_geoshop_connector/connectors/extract-connector-geoshop/ && \
-    mvn clean install && \
-    cp target/extract-connector-geoshop-*.jar /extract-build/extract/extract/src/main/resources/connectors && \
-    cd /extract-build/extract/ && git checkout "${EXTRACT_VERSION}" && \
+RUN cd /extract-build/extract/ && git checkout "${EXTRACT_VERSION}" && \
     cp /extract-build/application.properties /extract-build/extract/extract/src/main/resources/application.properties && \
+    cd /extract-build/extract/sitn_geoshop_connector/plugin-interface/ && \
+    mvn clean install && \
     cd /extract-build/extract/extract-interface && \
     mvn clean install && \
     cd /extract-build/extract-task-exec && \
