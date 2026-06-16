@@ -17,9 +17,11 @@ COPY extract-task-exec /extract-build/extract-task-exec
 
 # Copy custom application.properties file to the build folder
 COPY config/application.properties /extract-build/application.properties
+COPY i18n /extract-build/i18n
 
 RUN cd /extract-build/extract/ && git checkout "${EXTRACT_VERSION}" && \
     cp /extract-build/application.properties /extract-build/extract/extract/src/main/resources/application.properties && \
+    cp /extract-build/i18n/messages_de.properties /extract-build/extract/extract/src/main/resources/messages_de.properties && \
     cd /extract-build/extract/sitn_geoshop_connector/plugin-interface/ && \
     mvn clean install && \
     cd /extract-build/extract/sitn_geoshop_connector/connectors/extract-connector-geoshop && \
