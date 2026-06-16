@@ -154,6 +154,8 @@ services:
       - ./volumes/geoshop-back/keys:/keys
       - ./volumes/cert:/usr/local/share/ca-certificates/geoshop
       - ./volumes/cert:/cert
+    ports:
+      - 8000:8000
     healthcheck:
       test: curl -L --fail http://localhost:8000/api || exit 1
       interval: 10s
@@ -237,6 +239,8 @@ services:
       - EXTERNAL_URL=https://extract
       - GEODATA_POSTGRES_HOST=extract-db
       - EXTRACT_I18N_LANGUAGE=de
+    ports:
+      - 8080:8080
     volumes:
       - ./volumes/cert:/cert
       - ./volumes/cert/:/usr/local/share/ca-certificates/
