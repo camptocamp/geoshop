@@ -22,6 +22,9 @@ RUN cd /extract-build/extract/ && git checkout "${EXTRACT_VERSION}" && \
     cp /extract-build/application.properties /extract-build/extract/extract/src/main/resources/application.properties && \
     cd /extract-build/extract/sitn_geoshop_connector/plugin-interface/ && \
     mvn clean install && \
+    cd /extract-build/extract/sitn_geoshop_connector/connectors/extract-connector-geoshop && \
+    mvn clean install && \
+    cp /extract-build/extract/sitn_geoshop_connector/connectors/extract-connector-geoshop/target/extract-connector-geoshop-*.jar /extract-build/extract/extract/src/main/resources/connectors/ && \
     cd /extract-build/extract/extract-interface && \
     mvn clean install && \
     cd /extract-build/extract-task-exec && \
