@@ -1,6 +1,6 @@
 Geoshop docker package
 =====
-Extract v2.3.1-c2c.2
+Extract v2.3.1-c2c.6
 
 ## Demo and the config for Extract and Geoshop
 
