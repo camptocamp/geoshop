@@ -1,4 +1,6 @@
 VERSION ?= $(shell git describe --always --tags)
+# Version of camptocamp/extract to build. Accepts a tag, a branch, or a commit SHA.
+EXTRACT_VERSION ?= c2c.1
 DOCKER_TAG ?= latest
 
 export DOCKER_BUILDKIT=1
@@ -8,13 +10,13 @@ export DOCKER_BUILDKIT=1
 .PHONY: build_docker
 build_docker: ## Build docker image
 	docker build --tag=camptocamp/asit-extract:$(VERSION) \
-		--build-arg=VERSION=$(VERSION) .
+		--build-arg=EXTRACT_VERSION=$(EXTRACT_VERSION) .
 	docker tag camptocamp/asit-extract:$(VERSION) camptocamp/asit-extract:$(DOCKER_TAG)
 
 .PHONY: build_ghcr
 build_ghcr: ## Build docker image tagged for GHCR
 	docker build --tag=ghcr.io/camptocamp/asit-extract:$(VERSION) \
-		--build-arg=VERSION=$(VERSION) .
+		--build-arg=EXTRACT_VERSION=$(EXTRACT_VERSION) .
 	docker tag ghcr.io/camptocamp/asit-extract:$(VERSION) ghcr.io/camptocamp/asit-extract:$(DOCKER_TAG)
 
 .PHONY: push_ghcr
