@@ -4,6 +4,8 @@ LABEL Maintainer="andrey.rusakov@camptocamp.com" Vendor="Camptocamp"
 
 WORKDIR /extract-build
 
+ARG EXTRACT_VERSION
+
 ENV EXTRACT_VERSION="${EXTRACT_VERSION:-master}" \
     GEOSHOP_CONNECTOR_VERSION="${GEOSHOP_CONNECTOR_VERSION:-main}"
 

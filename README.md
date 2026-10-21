@@ -83,8 +83,13 @@ To generate new certificates, go to the ```volumes/cert```, remove *crt, *key an
 run ```bash gencert.sh <domain>```.  Certificates are used only for tests and there is no need to
 worry about exposing them.
 
+### Extract version
+The image builds [camptocamp/extract](https://github.com/camptocamp/extract), a fork of the Asit
+project. The `EXTRACT_VERSION` variable in `extract/Makefile` pins the tag or commit that is built.
+Change that value to upgrade Extract, then commit and tag this repository.
+
 ### Sources
-* [Extract](https://github.com/asit-asso/extract)
+* [Extract](https://github.com/camptocamp/extract) (fork of [asit-asso/extract](https://github.com/asit-asso/extract))
 * [Geoshop Extract connector](https://github.com/sitn/sitn_geoshop_connector)
 * [Geoshop backend](https://github.com/camptocamp/geoshop-back/)
 
